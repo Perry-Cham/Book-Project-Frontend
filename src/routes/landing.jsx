@@ -26,6 +26,13 @@ mainText={"If you find one particularly interesting your free to download it and
 imgClass={"col-start-1"}
 bodyClass={"col-start-2"}
 />
+<section className="min-h-[25vh] flex justify-center items-center flex-col">
+  <h2 className="text-center my-4 text-uppercase">Get Started</h2>
+  <div className="flex justify-center items-center">
+  <button className="bg-blue-900 text-white px-4 mx-4">Login</button>
+  <button className="border-2 border-blue-900 px-4 mx-4">Sign Up</button>
+  </div>
+</section>
   </>)
 }
 export default LandingPage;
