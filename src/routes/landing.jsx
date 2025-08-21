@@ -1,3 +1,4 @@
+import {Link} from 'react-router-dom'
 import SectionCard from './components/cards/section_card';
 function LandingPage (){
   return(
@@ -10,7 +11,7 @@ bodyClass={"col-start-1"}
 />
 <SectionCard 
 heading={"Save Books To Read Later"}
-mainText={"You can save books to your profile so that you never lose them. Then you can back to them later when you feel like scartching that literary itch."}
+mainText={"You can save books to your profile so that you never lose them. Then you can come back to them later when you feel like scartching that literary itch."}
 imgClass={"col-start-1"}
 bodyClass={"col-start-2"}
 />
@@ -29,10 +30,10 @@ bodyClass={"col-start-2"}
 <section className="min-h-[25vh] flex justify-center items-center flex-col">
   <h2 className="text-center my-4 text-uppercase">Get Started</h2>
   <div className="flex justify-center items-center">
-  <button className="bg-blue-900 text-white px-4 mx-4">Login</button>
-  <button className="border-2 border-blue-900 px-4 mx-4">Sign Up</button>
+  <button className="box-border h-[2rem] w-[6rem] bg-blue-900 text-white px-4 mx-4"><Link to='/signin'>Login</Link></button>
+  <button className="box-border h-[2rem] w-[6rem] border-2 border-blue-900 px-4 mx-4"><Link to='/signup'>Sign Up</Link></button>
   </div>
 </section>
   </>)
 }
-export default LandingPage;
+export default LandingPage; 
