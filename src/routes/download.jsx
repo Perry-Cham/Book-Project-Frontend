@@ -27,21 +27,22 @@ function Download_Page() {
         <div className="grid grid-cols-[50%_50%] gap-4 md:block">
           <img src={book.cover} />
           <div className="md:hidden">
-            <p><span className="font-bold">Title</span>:<br/>
+            <p><span className="font-bold">Title</span>:<br />
               {book.title}</p>
-            <p><span className="font-bold">Author:</span><br/>
+            <p><span className="font-bold">Author:</span><br />
               {book.author}</p>
-            <p><span className="font-bold">Genre:</span><br/>{book.genre}</p>
-            <p><span className="font-bold">Page Count:</span><br/>{book.pageCount}</p>
+            <p><span className="font-bold">Genre:</span><br />{book.genre}</p>
+            <p><span className="font-bold">Page Count:</span><br />{book.pageCount}</p>
           </div>
         </div>
-        <article>
+        <article className="box-border">
           <p className="hidden md:block">{book.title}</p>
           <p className="hidden md:block">{book.author}</p>
           <p className="hidden md:block">{book.genre}</p>
           <p className="hidden md:block">{book.pageCount}</p>
-          <p className="">{book.sypnosis}</p>
-          <a href={`https://standardebooks.org/ebooks?query=${encodeURI(book.title)}&sort=default&view=grid&per-page=12`} className="box-border inline-block min-h-[1.5rem] bg-blue-900 text-white my-5 py-2 px-3">Save Book</a>
+          <p className="">{book.synopsis}</p>
+          <a href={`https://standardebooks.org/ebooks?query=${encodeURI(book.title)}&sort=default&view=grid&per-page=12`} className="box-border inline-block h-[2.5rem] bg-blue-900 text-white my-5 py-2 px-3">Download Book</a>
+<button className="border-2 border-blue-900 h-[2.5rem] my-5 py-1 px-3 ml-4">Save To Read Later</button>
         </article>
       </div>}
     </>
