@@ -1,20 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 import Navigation_Bar from './routes/components/navbar'
 import LandingPage from './routes/landing'
+import Goal_Page from './routes/goal'
 import Download_Page from './routes/download'
 import Auth from './routes/auth'
 import Home from './routes/home'
 import './css/styles.css'
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState({
+    name:null,
+      loggedIn:false
+  });
 
   return (
     <Router>
       <Navigation_Bar />
 <Routes>
-<Route path="/"  element={<LandingPage />}/>
+<Route path="/"  element={<LandingPage setUser={setUser}/>}/>
   <Route path='/home' element={<Home />}/>
+  <Route path='/goal' element={<Goal_Page />}/>
   <Route path='/download/:id' element={<Download_Page />}/>
   <Route path='/signin' element={<Auth type="login"/>}/>
   <Route path='/signup' element={<Auth type="signup"/>}/>

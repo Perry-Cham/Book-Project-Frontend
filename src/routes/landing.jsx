@@ -1,6 +1,34 @@
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
+import {useState, useEffect} from 'react'
+import useAuthStore from './stores/auth_store'
+import axios from 'axios'
 import SectionCard from './components/cards/section_card';
 function LandingPage (){
+  const user = useAuthStore((state) => state.user)
+  const setUser = useAuthStore((state) => state.setUser)
+  
+  const navigate = useNavigate()
+  useEffect(() => {
+async  function fetchSession(){
+  const userSession = await axios.get('http://localhost:3000/getsession', {
+    withCredentials:true
+  });
+  console.log(userSession)
+  if(userSession.status == 200){
+    const user2 = {
+      name:userSession.data.name,
+      loggedIn:true
+    }
+    console.log(user2)
+    setUser(user2)
+    navigate('/home')
+  }else{
+    alert('No session found')
+    navigate('/')
+  }
+  }
+  fetchSession();
+},[])
   return(
   <>
 <SectionCard 
