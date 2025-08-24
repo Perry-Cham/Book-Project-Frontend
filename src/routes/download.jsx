@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 import Book_Card from './components/cards/book_card';
 function Download_Page() {
   const { id } = useParams();
@@ -8,9 +9,8 @@ function Download_Page() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await fetch(`http://localhost:3000/download/${id}`)
-        const book2 = await data.json();
-        setBook(book2)
+        const response= await axios.get(`http://localhost:3000/download/${id}`, {withCredentials:true})
+        setBook(response.data)
 
       } catch (err) {
         console.error(err)
@@ -18,8 +18,17 @@ function Download_Page() {
     }
     fetchData()
   }, [])
-  console.log(book)
-  /* fetch(`http://localhost:3000/download/${id}`).then((data) => data.json()).then((data) => console.log(data)).catch(err => console.log(err))*/
+async  function handleSave(id){
+    try {
+      const response = await axios.post(`http://localhost:3000/saveBook/${id}`,{}, {withCredentials:true})
+      if(response.status == 200){
+        console.log(response)
+        alert('Your book has been saved to your profile')}else alert('The operation could not be completed')
+    }catch(err){
+      console.error(err)
+      alert('The operation could not be completed')
+    }
+  }
   return (
     <>
       <h2 className="text-center font-bold text-xl my-4">Welcome To The Download Page</h2>
@@ -42,7 +51,7 @@ function Download_Page() {
           <p className="hidden md:block">{book.pageCount}</p>
           <p className="">{book.synopsis}</p>
           <a href={`https://standardebooks.org/ebooks?query=${encodeURI(book.title)}&sort=default&view=grid&per-page=12`} className="box-border inline-block h-[2.5rem] bg-blue-900 text-white my-5 py-2 px-3">Download Book</a>
-<button className="border-2 border-blue-900 h-[2.5rem] my-5 py-1 px-3 ml-4">Save To Read Later</button>
+<button onClick={() => handleSave(book._id)} className="border-2 border-blue-900 h-[2.5rem] my-5 py-1 px-3 ml-4">Save To Read Later</button>
         </article>
       </div>}
     </>

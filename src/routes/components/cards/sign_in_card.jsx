@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import useAuthStore from '../../stores/auth_store'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
 function Sign_In_Card({ type }) {
+  const user = useAuthStore((state) => state.user)
+  const setUser = useAuthStore((state) => state.setUser)
   const navigate = useNavigate()
+
 async function handleSubmit(e) {
     e.preventDefault();
     const form = new FormData(e.target)
@@ -11,10 +14,11 @@ async function handleSubmit(e) {
       password: form.get("password")
     }
     try{
-      const response = await axios.post("http://localhost:3000/signin", data, {
+      const response = await axios.post(e.target.getAttribute('action'), data, {
         withCredentials:true
       })
       if (response.status == 200) {
+        setUser(response.data)
         navigate('/home')
       } else {
         alert('Login Failed')

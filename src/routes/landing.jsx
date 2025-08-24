@@ -1,8 +1,12 @@
 import {Link, useNavigate} from 'react-router-dom'
 import {useState, useEffect} from 'react'
+import useAuthStore from './stores/auth_store'
 import axios from 'axios'
 import SectionCard from './components/cards/section_card';
-function LandingPage ({setUser}){
+function LandingPage (){
+  const user = useAuthStore((state) => state.user)
+  const setUser = useAuthStore((state) => state.setUser)
+  
   const navigate = useNavigate()
   useEffect(() => {
 async  function fetchSession(){
