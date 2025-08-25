@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.btn-secondary {
+        @apply box-border h-[2rem] border-2 border-blue-900 px-4
+    }

@@ -11,7 +11,6 @@ function Home(){
   const user = useAuthStore((state) => state.user)
   const setUser = useAuthStore((state) => state.setUser)
   const navigate = useNavigate();
-  console.log(user)
   useEffect(() => {
     async function fetchData(){
     try{
@@ -51,7 +50,7 @@ function Home(){
       <p className="text-center">Here's our collection of books you should try</p>
       <Modal />
       {books && books.map((book) =>{
-    return (<Book_Card key={book.id}
+    return (<Book_Card key={book._id}
         book={book}
         />)
       })}
