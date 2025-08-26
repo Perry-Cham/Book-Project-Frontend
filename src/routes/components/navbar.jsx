@@ -8,13 +8,13 @@ function Navigation_Bar() {
   const navigate = useNavigate();
   const location = useLocation();
   const setUser = useAuthStore((state) => state.setUser)
-  
+  const api = import.meta.env.VITE_API
   useEffect(() => {
     fetchSession();
   }, [])
 async  function fetchSession(){
     try{
-  const userSession = await axios.get('http://localhost:3000/getsession', {
+  const userSession = await axios.get(`${api}/getsession`, {
     withCredentials:true
   });
   console.log(userSession)
@@ -37,7 +37,7 @@ async  function fetchSession(){
   }
   async function handleLogout() {
     try {
-      const response = await axios.get('http://localhost:3000/logout', {
+      const response = await axios.get(`${api}/logout`, {
         withCredentials:true
       })
       if (response.status == 200) navigate('/'); else alert('logout failed')

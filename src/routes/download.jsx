@@ -5,11 +5,11 @@ import Book_Card from './components/cards/book_card';
 function Download_Page() {
   const { id } = useParams();
   const [book, setBook] = useState()
-
+  const api = import.meta.env.VITE_API
   useEffect(() => {
     async function fetchData() {
       try {
-        const response= await axios.get(`http://localhost:3000/download/${id}`, {withCredentials:true})
+        const response= await axios.get(`${api}/download/${id}`, {withCredentials:true})
         setBook(response.data)
 
       } catch (err) {
@@ -20,7 +20,7 @@ function Download_Page() {
   }, [])
 async  function handleSave(id){
     try {
-      const response = await axios.post(`http://localhost:3000/saveBook/${id}`,{}, {withCredentials:true})
+      const response = await axios.post(`${api}/saveBook/${id}`,{}, {withCredentials:true})
       if(response.status == 200){
         console.log(response)
         alert('Your book has been saved to your profile')}else alert('The operation could not be completed')
