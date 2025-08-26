@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+.btn-primary{
+ @apply box-border inline-block h-[2rem] bg-blue-900 text-white px-4 
+}
 .btn-secondary {
         @apply box-border h-[2rem] border-2 border-blue-900 px-4
     }
+.active-link{
+@apply  bg-blue-600 shadow-md rounded-md
+}

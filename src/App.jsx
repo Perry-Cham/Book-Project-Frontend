@@ -9,16 +9,14 @@ import Auth from './routes/auth'
 import Home from './routes/home'
 import './css/styles.css'
 function App() {
-  const [user, setUser] = useState({
-    name:null,
-      loggedIn:false
-  });
+  const api = import.meta.env.VITE_API
+  
 
   return (
     <Router>
       <Navigation_Bar />
 <Routes>
-<Route path="/"  element={<LandingPage setUser={setUser}/>}/>
+<Route path="/"  element={<LandingPage />}/>
   <Route path='/home' element={<Home />}/>
   <Route path='/goal' element={<Goal_Page />}/>
   <Route path='/download/:id' element={<Download_Page />}/>

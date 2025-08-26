@@ -4,11 +4,7 @@ import useAuthStore from './stores/auth_store'
 import axios from 'axios'
 import SectionCard from './components/cards/section_card';
 function LandingPage (){
-  const user = useAuthStore((state) => state.user)
-  const setUser = useAuthStore((state) => state.setUser)
-  
-  const navigate = useNavigate()
-  useEffect(() => {
+/*  useEffect(() => {
 async  function fetchSession(){
   const userSession = await axios.get('http://localhost:3000/getsession', {
     withCredentials:true
@@ -28,7 +24,7 @@ async  function fetchSession(){
   }
   }
   fetchSession();
-},[])
+},[]) */
   return(
   <>
 <SectionCard 

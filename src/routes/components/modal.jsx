@@ -1,9 +1,10 @@
 import {useState, useEffect} from 'react'
 import {useLocation} from 'react-router-dom'
 import {XMarkIcon} from '@heroicons/react/24/solid'
-function Modal({title, message, setPage}){
+function Modal({modalState, setPage}){
   const [open, setOpen] = useState(true)
   const condition = location.pathname === "/goal" || location.pathname === "/study";
+  const api = import.meta.env.VITE_API
 function handleClose(){
   setOpen(false)
 }
@@ -19,11 +20,12 @@ function handleSubmit(e){
 
      <div className="p-[1.75rem] bg-white rounded-md md:w-[300px] min-w-[200px]">
         <XMarkIcon onClick={handleClose} className="size-6 cursor-pointer text-right"/>
-        <h2>{title}</h2>
-        <p>{message}</p>
+        <h2>{modalState.title}</h2>
+        <p>{modalState.message}</p>
+        
         {condition &&
         <form onSubmit={(e) => handleSubmit(e)}>
-          <label htmlfor="pageCount">Enter Page Count (if different from the one stated)</label>
+          <label htmlFor="pageCount">{modalState.type === "setMax" ? "Enter Page Count (if different from the one stated)" : "Enter The Page You're On Now"}</label>
           <input className="border-2 rounded-md focus:border-blue-800 p-2" type="number" name="pageCount"/>
           <button className="btn-secondary rounded-md mt-3"  type="submit">Set Book</button>
         </form>}
