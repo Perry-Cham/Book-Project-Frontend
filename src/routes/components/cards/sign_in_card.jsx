@@ -5,6 +5,7 @@ function Sign_In_Card({ type }) {
   const user = useAuthStore((state) => state.user)
   const setUser = useAuthStore((state) => state.setUser)
   const navigate = useNavigate()
+  const api = import.meta.env.VITE_API
 
 async function handleSubmit(e) {
     e.preventDefault();
@@ -29,7 +30,7 @@ async function handleSubmit(e) {
   }
 
 return (
-  <form onSubmit={(e) => handleSubmit(e)} method="POST" action={type === "login" ? "http://localhost:3000/signin" : "http://localhost:3000/signup"}>
+  <form onSubmit={(e) => handleSubmit(e)} method="POST" action={type === "login" ? `${api}/signin` : `${api}/signup`}>
     <h2>{type == 'login' ? 'Sign In' : 'Sign Up'}</h2>
     <label for="name">Username</label>
     <input name="name" type="text" placeholder="Perry"></input>
