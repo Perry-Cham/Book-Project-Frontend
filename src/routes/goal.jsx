@@ -134,6 +134,7 @@ function Goal_Page() {
       const response = await axios.get(`${api}/getgoal`, {
         withCredentials: true
       });
+      console.log(response)
       if (response.status == 200) {
         const goal = response.data;
         const spages = goal.currentBooks.reduce((a, b) => a + b.page, 0)
@@ -227,21 +228,21 @@ function Goal_Page() {
         {goal ?
           <div>
             <p>Books to read: {goal.goal.numberOfBooks}</p>
-            {true ? 
+            {goal.pageView ? 
              <div>
-              <input type="range" value={goal.goal.pagesRead} max={goal.goal.totalPages} />
+              <input type="range" value={goal.pagesRead} max={goal.totalPages} />
               <p>{goal.pagesRead} / {goal.totalPages}</p>
-              <p>{Math.ceil((goal.pagesRead / goal.totalPages) * 100)}% complete</p>
+              <p>{Math.ceil((goal.pagesRead / goal.totalPages) * 100)}% complete {goal.pageView ? `of ${goal.currentBooks.length} book(s)`: ""}</p>
               </div>
 : 
             <div>
               <input type="range" value={goal.goal.booksRead.length} max={goal.goal.numberOfBooks} />
-              <p>{(goal.goal.booksRead.length / goal.goal.numberOfBooks) * 100}% complete</p>
+              <p>{(goal.goal.booksRead.length / goal.goal.numberOfBooks) * 100}% complete </p>
             </div>
             
             }
             
-            <button onClick={() => {goal.goal.pagesView ? setGoal({...goal, pagesView:false}) : setGoal({...goal, pagesView:true})}}>Switch to pages view</button>
+            <button onClick={() => {goal.pageView ? setGoal({...goal, pageView:false}) : setGoal({...goal, pageView:true})}}>Switch to pages view</button>
 
             <p>
               Ending On: {
