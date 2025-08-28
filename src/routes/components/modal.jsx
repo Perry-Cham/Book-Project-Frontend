@@ -10,10 +10,11 @@ function Modal({ modalState }) {
   }
   function handleSubmit(e) {
     e.preventDefault()
+    console.log(modalState)
     if (modalState.type !== "setGoal") {
       const form = new FormData(e.target)
       const data = form.get("pageCount")
-      modalState.sendData(data)
+      modalState.sendData(data, modalState.type, modalState.currBook);
     } else {
       const form = new FormData(e.target)
      const data = {
@@ -45,7 +46,7 @@ function Modal({ modalState }) {
           <form onSubmit={(e) => handleSubmit(e)}>
             <h2>Set a Reading Goal</h2>
             <label htmlFor="">Number of Books</label>
-            <input className="block" type="Number" name="numberOfBooks" value="3"/>
+            <input className="block" type="Number" name="numberOfBooks"/>
             <label htmlFor="">Duration</label>
             <input className="block" type="Number" name="duration"/>
             <label htmlFor="unit">Unit Of Measurement</label>

@@ -1,6 +1,6 @@
 import useAuthStore from './stores/auth_store'
 import Modal from './components/modal'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 function Goal_Page() {
   const api = import.meta.env.VITE_API
@@ -10,48 +10,51 @@ function Goal_Page() {
   const user = useAuthStore((state) => state.user)
   const setUser = useAuthStore((state) => state.setUser)
   const [modalState, setModalState] = useState({
-    title: "", message: "", type: "", open: false
+    title: "", message: "", type: "", open: false, sendData:null
   });
   const [currBook, setCurrBook] = useState({})
   useEffect(() => {
     getSavedBooks()
     getCurrentBooks();
+    getGoal();
   }, [])
 
 
   //Upon saved Book onClick
   function openModal(book, type, fun) {
     book && setCurrBook(book)
-    setModalState({ ...modalState, type: type, open: true, sendData: fun })
+    setModalState(prev => ({ ...prev, type: type, open: true, sendData: fun, currBook: book }))
   }
 
   //Functions that send data to the server
-  function setPage(pageCount) {
-    setModalState({ })
+  function setPage(pageCount, type, currBook2) {
+   setModalState(() => ({...modalState, open:false})) 
+
     let data;
 
-    if (modalState.type === 'setMax') {
+    if (type === 'setMax') {
       data = {
-        title: currBook.title,
-        cover: currBook.cover,
-        pageCount: pageCount || currBook.pageCount,
+        title: currBook2.title,
+        cover: currBook2.cover,
+        pageCount: pageCount || currBook2.pageCount,
         page: 1,
-        mainBook: currBook._id,
+        mainBook: currBook2._id,
         history: []
       }
     } else {
       data = {
-        id: currBook._id,
-        title: currBook.title,
+        id: currBook2._id,
+        title: currBook2.title,
         pageCount: pageCount
       }
     }
-    handleRead(data)
+      console.log(modalState, data, currBook)
+    handleRead(data, type)
   }
 
   //Post Requests
-  async function handleRead(data) {
-    const endpoint = modalState.type == "setMax" ? "setcurrentbook" : "setcurrentpage";
+  async function handleRead(data, type) {
+    const endpoint = type == "setMax" ? "setcurrentbook" : "setcurrentpage";
     try {
       const response = await axios.post(`${api}/${endpoint}`, data, {
         withCredentials: true
@@ -62,7 +65,7 @@ function Goal_Page() {
         }
         getCurrentBooks();
         getSavedBooks();
-        setModalState({})
+      
       }
       else {
         alert('Error adding book')
@@ -76,21 +79,20 @@ function Goal_Page() {
 
   async function handleGoal(data) {
     console.log(data)
-    setModalState({})
-     try {
-        const response = await axios.post(`${api}/setgoal`, data, {
-          withCredentials: true
-        })
-        if (response.status == 200) {
-          alert("Congratulations you've just started a new goal. Happy Reading")
-       }
-        else {alert('Error adding book')
-          console.log(response)
-        }
-          setModalState({})
-        }catch (err) {
-        console.error(err)
-      } 
+    try {
+      const response = await axios.post(`${api}/setgoal`, data, {
+        withCredentials: true
+      })
+      if (response.status == 200) {
+        alert("Congratulations you've just started a new goal. Happy Reading")
+      }
+      else {
+        alert('Error adding book')
+        console.log(response)
+      }
+    } catch (err) {
+      console.error(err)
+    }
   }
 
 
@@ -102,11 +104,10 @@ function Goal_Page() {
       })
       if (response.status == 200) {
         response.data.length !== 0 ? setCbooks(response.data.currentBooks) : setCbooks(undefined)
-        console.log(response)
+
       }
       else {
         alert('Error fetching books')
-        console.log(response)
       }
     } catch (err) {
       console.err(err)
@@ -128,22 +129,23 @@ function Goal_Page() {
     }
   }
 
-  async function getCurrentBooks() {
+  async function getGoal() {
     try {
-      const response = await axios.get(`${api}/getcurrentbooks`, {
+      const response = await axios.get(`${api}/getgoal`, {
         withCredentials: true
-      })
+      });
       if (response.status == 200) {
-        response.data.currentBooks.length !== 0 ? setCbooks(response.data.currentBooks) : setCbooks(undefined)
-        console.log(response.data)
-      }
-      else {
-        alert('Error fetching books')
-        console.log(response)
-      }
+        const goal = response.data;
+        const spages = goal.currentBooks.reduce((a, b) => a + b.page, 0)
+        const tpage = goal.currentBooks.reduce((a, b) => a + b.pageCount, 0)
+        goal.pagesRead = spages;
+        goal.totalPages = tpage;
+        goal.pageView = false;
+        setGoal(response.data)
+      } else { setGoal(undefined) }
     } catch (err) {
       console.error(err)
-      alert('Error fetching books')
+      setGoal(undefined)
     }
   }
   //Functions that delete data from the server
@@ -196,7 +198,7 @@ function Goal_Page() {
             <p>{book.title}</p>
             <p>{book.author}</p>
             <p>{book.pageCount}</p>
-            <button onClick={() => openModal(book, "setCurrent")} className="btn-primary">Set Current Page</button>
+            <button onClick={() => openModal(book, "setCurrent", setPage)} className="btn-primary">Set Current Page</button>
             <button className="btn-secondary" onClick={() => handleDelete(book._id, false)}>Delete Book</button>
           </div>) :
           <div>
@@ -212,7 +214,7 @@ function Goal_Page() {
             <p>{book.title}</p>
             <p>{book.author}</p>
             <p>{book.pageCount}</p>
-            <button className="btn-primary" onClick={() => openModal(book, "setMax")}>Start Reading</button>
+            <button className="btn-primary" onClick={() => openModal(book, "setMax", setPage)}>Start Reading</button>
             <button className="btn-secondary" onClick={() => handleDelete(book._id, true)}>Delete Book</button>
           </div>) :
           <div>
@@ -222,7 +224,36 @@ function Goal_Page() {
 
       <section>
         <h2>Reading Goals</h2>
-        {goal ? <div>Place holder</div> :
+        {goal ?
+          <div>
+            <p>Books to read: {goal.goal.numberOfBooks}</p>
+            {true ? 
+             <div>
+              <input type="range" value={goal.goal.pagesRead} max={goal.goal.totalPages} />
+              <p>{goal.pagesRead} / {goal.totalPages}</p>
+              <p>{Math.ceil((goal.pagesRead / goal.totalPages) * 100)}% complete</p>
+              </div>
+: 
+            <div>
+              <input type="range" value={goal.goal.booksRead.length} max={goal.goal.numberOfBooks} />
+              <p>{(goal.goal.booksRead.length / goal.goal.numberOfBooks) * 100}% complete</p>
+            </div>
+            
+            }
+            
+            <button onClick={() => {goal.goal.pagesView ? setGoal({...goal, pagesView:false}) : setGoal({...goal, pagesView:true})}}>Switch to pages view</button>
+
+            <p>
+              Ending On: {
+                (() => {
+                  const end = new Date(goal.goal.endDate);
+                  return `${end.getDate()}-${end.getMonth() + 1}-${end.getFullYear()}`;
+                })()
+              }
+            </p>
+<p>{goal.daysLeft} days left</p>
+            <button className="border-2 border-red-600 py-1 px-2 mt-2">Delete Goal</button>
+          </div> :
           <div>
             <p>Build a reading habit by setting a reading goal. Once you set one it'll appear here</p>
             <button className="btn-primary" onClick={() => openModal("", "setGoal", handleGoal)}>Set Goal</button>
