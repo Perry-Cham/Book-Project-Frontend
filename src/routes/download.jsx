@@ -1,7 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import Book_Card from './components/cards/book_card';
 function Download_Page() {
   const { id } = useParams();
   const [book, setBook] = useState()

@@ -1,9 +1,8 @@
 import {useState, useEffect} from 'react'
 import {useNavigate} from 'react-router-dom'
-import useAuthStore from './stores/auth_store'
+import useAuthStore from '../stores/auth_store'
 import axios from 'axios'
-import Book_Card from './components/cards/book_card'
-import Modal from './components/modal'
+import Book_Card from '../components/cards/book_card'
 function Home(){
   const api = import.meta.env.VITE_API
   console.log(api, typeof api)
