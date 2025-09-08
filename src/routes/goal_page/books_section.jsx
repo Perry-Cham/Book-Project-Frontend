@@ -1,12 +1,18 @@
-import {useState} from 'react'
-function Book_Section(params) {
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import Book_Card from '../../components/cards/book_card'
+import Modal from '../../components/modal'
+function Book_Section({ openModal, setModalState, modalState, api}) {
   const [sbooks, setSbooks] = useState();
   const [cbooks, setCbooks] = useState();
   const [currBook, setCurrBook] = useState({});
 
-
+useEffect(() => {
+  getSavedBooks()
+  getCurrentBooks()
+},[])
   function setPage(pageCount, type, currBook2) {
-    setModalState(() => ({ ...modalState, open: false }));
+    setModalState((prev) => ({ ...prev, open: false }));
 
     let data;
 
@@ -37,10 +43,13 @@ function Book_Section(params) {
       const response = await axios.post(`${api}/${endpoint}`, data, {
         withCredentials: true
       });
+      console.log(response)
       if (response.status == 200) {
         if (modalState.type === "setMax") {
+          console.log(response)
           alert(`Congratulations you've just started ${response.data.name}`);
         } else {
+          console.log(response)
           alert(`Congratulations you're now on page ${response.data.page} in ${response.data.title}`);
         }
         getCurrentBooks();
@@ -60,8 +69,9 @@ function Book_Section(params) {
       const response = await axios.get(`${api}/getcurrentbooks`, {
         withCredentials: true
       });
+        console.log(response)
       if (response.status == 200) {
-        response.data.length !== 0 ? setCbooks(response.data.currentBooks) : setCbooks(undefined);
+        response.data.currentBooks.length > 0 ? setCbooks(response.data.currentBooks) : setCbooks(undefined);
       } else {
         alert('Error fetching books');
       }
@@ -124,19 +134,12 @@ function Book_Section(params) {
 
   // TODO: Replace the following with your actual JSX UI
   return (
-<>
-<section>
-  {modalState.open && <Modal modalState={modalState} />}
+    <>
+      <section>
+        {modalState.open && <Modal setModalState={setModalState} modalState={modalState} />}
         <h2>Currently Reading</h2>
         {cbooks ? cbooks.map((book) =>
-          <div key={book._id}>
-            <img className="w-[150px]" src={book.cover} alt={book.title + " cover image"} />
-            <p>{book.title}</p>
-            <p>{book.author}</p>
-            <p>{book.pageCount}</p>
-            <button onClick={() => openModal(book, "setCurrent", setPage)} className="btn-primary">Set Current Page</button>
-            <button className="btn-secondary" onClick={() => handleDelete(book._id, false)}>Delete Book</button>
-          </div>) :
+          <Book_Card book={book} type={"currentBook"} functions={{ openModal, setPage, handleDelete }} />) :
           <div>
             <p>You haven't started reading anything yet, books you read will appear here</p>
           </div>}
@@ -145,18 +148,12 @@ function Book_Section(params) {
       <section>
         <h2>Saved Books</h2>
         {sbooks ? sbooks.map((book) =>
-          <div key={book._id}>
-            <img className="w-[150px]" src={book.cover} alt={book.title + " cover image"} />
-            <p>{book.title}</p>
-            <p>{book.author}</p>
-            <p>{book.pageCount}</p>
-            <button className="btn-primary" onClick={() => openModal(book, "setMax", setPage)}>Start Reading</button>
-            <button className="btn-secondary" onClick={() => handleDelete(book._id, true)}>Delete Book</button>
-          </div>) :
-          <div>
-            <p>You haven't saved anything yet, books you save will appear here</p>
-          </div>}
-      </section>
+          <Book_Card book={book} type={"savedBook"} functions={{ openModal, setPage, handleDelete }} />
+          ) :
+      <div>
+        <p>You haven't saved anything yet, books you save will appear here</p>
+      </div>}
+    </section >
 </>
   
   );

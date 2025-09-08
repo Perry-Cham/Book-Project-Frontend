@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
-import Navigation_Bar from './routes/components/navbar'
+import Navigation_Bar from './components/navbar'
 import LandingPage from './routes/landing'
 import Goal_Page from './routes/goal'
 import Download_Page from './routes/download'

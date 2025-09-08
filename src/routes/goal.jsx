@@ -13,15 +13,9 @@ function Goal_Page() {
     title: "", message: "", type: "", open: false, sendData:null
   });
   
-  useEffect(() => {
-    getSavedBooks()
-    getCurrentBooks();
-    getGoal();
-  }, [])
 
   //Upon saved Book onClick
   function openModal(book, type, fun) {
-    book && setCurrBook(book)
     setModalState(prev => ({ ...prev, type: type, open: true, sendData: fun, currBook: book }))
   }
 
@@ -29,7 +23,7 @@ function Goal_Page() {
     <>
       <h2>Hello, {user.name && user.name}</h2>
       <Book_Section openModal={openModal} api={api} modalState={modalState} setModalState={setModalState} />
-      <Goal_Section openModal={openModal} api={api} modalState={modalState} setModalState={setModalState} />
+  <Goal_Section openModal={openModal} api={api} modalState={modalState} setModalState={setModalState} />
       <History_Section api={api} modalState={modalState} setModalState={setModalState} />
     </>
   )

@@ -30,6 +30,7 @@ function Home(){
       {books && books.map((book) =>{
     return (<Book_Card key={book.id}
         book={book}
+        type={"homeBook"}
         />)
       })}
     </>

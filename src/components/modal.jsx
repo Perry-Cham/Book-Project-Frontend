@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { XMarkIcon } from '@heroicons/react/24/solid'
-function Modal({ modalState }) {
+function Modal({ modalState, setModalState }) {
   const [open, setOpen] = useState(true)
   const condition = location.pathname === "/goal" || location.pathname === "/study";
   const api = import.meta.env.VITE_API
   function handleClose() {
-    setOpen(false)
+    setModalState((prev) => ({title:"", message:"", type:"", open:false, sendData:""}))
   }
   function handleSubmit(e) {
     e.preventDefault()

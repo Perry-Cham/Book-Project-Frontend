@@ -1,7 +1,8 @@
-   function History_Section() {
+  import {useState, useEffet} from 'react'
+   function History_Section({}) {
     return( <section>
         <h2>Reading History</h2>
-        {cbooks ? <div>
+        {false ? <div>
           <p>placeholder</p>
         </div> :
           <div>
