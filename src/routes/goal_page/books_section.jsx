@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Book_Card from '../../components/cards/book_card'
 import Modal from '../../components/modal'
-function Book_Section({ openModal, setModalState, modalState, api}) {
-  const [sbooks, setSbooks] = useState();
-  const [cbooks, setCbooks] = useState();
+
+function Book_Section({ props, bookProps }) {
+  const { openModal, api, modalState, setModalState } = props;
+  const { sbooks, setSbooks, cbooks, setCbooks } = bookProps;
   const [currBook, setCurrBook] = useState({});
 
-useEffect(() => {
-  getSavedBooks()
-  getCurrentBooks()
-},[])
-  function setPage(pageCount, type, currBook2) {
+  useEffect(() => {
+    getSavedBooks()
+    getCurrentBooks()
+  }, [])
+
+  function setPage(Data, type, currBook2) {
     setModalState((prev) => ({ ...prev, open: false }));
 
     let data;
@@ -20,7 +22,7 @@ useEffect(() => {
       data = {
         title: currBook2.title,
         cover: currBook2.cover,
-        pageCount: pageCount || currBook2.pageCount,
+        pageCount: Data.pageCount || currBook2.pageCount,
         page: 1,
         mainBook: currBook2._id,
         history: []
@@ -29,47 +31,39 @@ useEffect(() => {
       data = {
         id: currBook2._id,
         title: currBook2.title,
-        pageCount: pageCount
+        pageCount: Data.pageCount
       };
     }
-    console.log(modalState, data, currBook);
     handleRead(data, type);
   }
 
-  //Post Requests
   async function handleRead(data, type) {
     const endpoint = type == "setMax" ? "setcurrentbook" : "setcurrentpage";
     try {
       const response = await axios.post(`${api}/${endpoint}`, data, {
         withCredentials: true
       });
-      console.log(response)
       if (response.status == 200) {
-        if (modalState.type === "setMax") {
-          console.log(response)
-          alert(`Congratulations you've just started ${response.data.name}`);
+        if (type === "setMax") {
+          alert(`Congratulations you've just started ${data.title}`);
         } else {
-          console.log(response)
-          alert(`Congratulations you're now on page ${response.data.page} in ${response.data.title}`);
+          alert(`Congratulations you're now on page ${data.pageCount} in ${data.title}`);
         }
         getCurrentBooks();
         getSavedBooks();
       } else {
         alert('Error adding book');
-        console.log(response);
       }
     } catch (err) {
       console.error(err);
     }
   }
 
-  //Functions that fetch data from the server
   async function getCurrentBooks() {
     try {
       const response = await axios.get(`${api}/getcurrentbooks`, {
         withCredentials: true
       });
-        console.log(response)
       if (response.status == 200) {
         response.data.currentBooks.length > 0 ? setCbooks(response.data.currentBooks) : setCbooks(undefined);
       } else {
@@ -87,7 +81,6 @@ useEffect(() => {
       if (response.status == 200) {
         response.data.length !== 0 ? setSbooks(response.data) : setSbooks(undefined);
       } else {
-        console.log(response);
         alert('Error fetching books');
       }
     } catch (err) {
@@ -95,7 +88,6 @@ useEffect(() => {
     }
   }
 
-  //Functions that delete data from the server
   async function handleDelete(id, saved) {
     const isSaved = saved;
     if (isSaved) {
@@ -122,7 +114,6 @@ useEffect(() => {
           alert("You have deleted the book successfully");
           getCurrentBooks();
         } else {
-          console.log(response);
           alert("Server side error current");
         }
       } catch (err) {
@@ -131,13 +122,28 @@ useEffect(() => {
       }
     }
   }
-
-  // TODO: Replace the following with your actual JSX UI
+  async function handleAddCustom(data) {
+      try{
+     const response = await axios.post(`${api}/addcustombook`,data, {
+        withCredentials:true})
+        console.log(response)
+        if (response.status == 200) {
+             alert(`Congratulations you've just started ${data.title}`);
+           getCurrentBooks();
+           getSavedBooks();
+         } else {
+           alert('Error adding book');
+         }
+    }catch(err){
+         console.error(err)
+       }
+  }
   return (
     <>
       <section>
         {modalState.open && <Modal setModalState={setModalState} modalState={modalState} />}
         <h2>Currently Reading</h2>
+        <button onClick={() => openModal("", "addCustomBook", handleAddCustom)} className="btn-secondary">Add Your Own Book</button>
         {cbooks ? cbooks.map((book) =>
           <Book_Card book={book} type={"currentBook"} functions={{ openModal, setPage, handleDelete }} />) :
           <div>
@@ -149,13 +155,12 @@ useEffect(() => {
         <h2>Saved Books</h2>
         {sbooks ? sbooks.map((book) =>
           <Book_Card book={book} type={"savedBook"} functions={{ openModal, setPage, handleDelete }} />
-          ) :
-      <div>
-        <p>You haven't saved anything yet, books you save will appear here</p>
-      </div>}
-    </section >
-</>
-  
+        ) :
+          <div>
+            <p>You haven't saved anything yet, books you save will appear here</p>
+          </div>}
+      </section>
+    </>
   );
 }
 

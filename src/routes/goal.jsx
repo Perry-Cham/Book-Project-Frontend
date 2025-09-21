@@ -12,20 +12,23 @@ function Goal_Page() {
   const [modalState, setModalState] = useState({
     title: "", message: "", type: "", open: false, sendData:null
   });
+  const [sbooks, setSbooks] = useState();
+  const [cbooks, setCbooks] = useState();
   
 
   //Upon saved Book onClick
   function openModal(book, type, fun) {
     setModalState(prev => ({ ...prev, type: type, open: true, sendData: fun, currBook: book }))
   }
-
+const commonProps = {openModal:openModal, api:api, modalState:modalState, setModalState:setModalState}
+const bookProps = {sbooks:sbooks, setSbooks:setSbooks, cbooks:cbooks, setCbooks:setCbooks} 
   return (
-    <>
+    <div className="px-1 pt-2">
       <h2>Hello, {user.name && user.name}</h2>
-      <Book_Section openModal={openModal} api={api} modalState={modalState} setModalState={setModalState} />
-  <Goal_Section openModal={openModal} api={api} modalState={modalState} setModalState={setModalState} />
-      <History_Section api={api} modalState={modalState} setModalState={setModalState} />
-    </>
+      <Book_Section props={commonProps} bookProps={bookProps}/>
+  <Goal_Section props={commonProps} bookProps={bookProps}/>
+      <History_Section  cbooks={cbooks} props={commonProps}/>
+    </div>
   )
 }
 export default Goal_Page;

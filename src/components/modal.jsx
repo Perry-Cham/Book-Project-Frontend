@@ -4,27 +4,17 @@ import { XMarkIcon } from '@heroicons/react/24/solid'
 function Modal({ modalState, setModalState }) {
   const [open, setOpen] = useState(true)
   const condition = location.pathname === "/goal" || location.pathname === "/study";
+  const { sendData } = modalState
   const api = import.meta.env.VITE_API
   function handleClose() {
-    setModalState((prev) => ({title:"", message:"", type:"", open:false, sendData:""}))
+    setModalState((prev) => ({ title: "", message: "", type: "", open: false, sendData: "" }))
   }
   function handleSubmit(e) {
     e.preventDefault()
-    console.log(modalState)
-    if (modalState.type !== "setGoal") {
-      const form = new FormData(e.target)
-      const data = form.get("pageCount")
-      modalState.sendData(data, modalState.type, modalState.currBook);
-    } else {
-      const form = new FormData(e.target)
-     const data = {
-        numberOfBooks: form.get("numberOfBooks"),
-        duration: form.get("duration"),
-        unit: form.get("unit")
-      }
-      modalState.sendData(data);
-    }
-
+    const form = new FormData(e.target)
+    const data = Object.fromEntries(form.entries());
+    (modalState.type === 'setCurrent' || modalState.type === 'setMax') ? sendData(data, modalState.type, modalState.currBook) : sendData(data);
+      handleClose();
   }
 
   return (
@@ -42,22 +32,44 @@ function Modal({ modalState, setModalState }) {
             <button className="btn-secondary rounded-md mt-3" type="submit">Set Book</button>
           </form>}
 
+        {modalState.type == "addCustomBook" &&
+          <form onSubmit={(e) => handleSubmit(e)}>
+            <p>Enter the details of a book you're reading that isnt listed here to track your reading and make it count toward your goal (if applicable)</p>
+            <br></br>
+            <label htmlFor="title">Title</label>
+            <input name="title" type="text" placeholder="The Lord Of The Rings" />
+            <br></br>
+            <label htmlFor="author">Author</label>
+            <input  name="author" placeholder="J.R.R Tolkien" type="text" />
+            <br></br>
+            <label htmlFor="pageCount">Page Count</label>
+            <input name="pageCount" type="text" />
+            <button className="btn-primary">Submit</button>
+          </form>
+        }
+
         {modalState.type == "setGoal" &&
           <form onSubmit={(e) => handleSubmit(e)}>
             <h2>Set a Reading Goal</h2>
             <label htmlFor="">Number of Books</label>
-            <input className="block" type="Number" name="numberOfBooks"/>
+            <input className="block" type="Number" name="numberOfBooks" />
             <label htmlFor="">Duration</label>
-            <input className="block" type="Number" name="duration"/>
+            <input className="block" type="Number" name="duration" />
             <label htmlFor="unit">Unit Of Measurement</label>
             <br></br>
-          <input className="capitalize" type="radio" name="unit"  id="day" value="day"/>
-          <label for="day">Day(s)</label><br/>
-          <input className="capitalize" type="radio" name="unit"  id="week" value="week"  selected />
-          <label for="week">Week(s)</label><br/>
+            <input className="capitalize" type="radio" name="unit" id="day" value="day" />
+            <label for="day">Day(s)</label><br />
+            <input className="capitalize" type="radio" name="unit" id="week" value="week" selected />
+            <label for="week">Week(s)</label><br />
             <button className="btn-primary">Submit</button>
           </form>
         }
+{(modalState.type == "setGoal" && props.children) && 
+<form onSubmit={() => handleSubmit(e)}>
+  {props.children}
+     <button className="btn-primary">Submit</button>
+</form>
+}
       </div>
     </div>
   )
