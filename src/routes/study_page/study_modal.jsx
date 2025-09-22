@@ -1,36 +1,40 @@
 import { useState } from 'react'
-function Study_Modal({ type, handleSubmit}) {
+function Study_Modal({ type, handleSubmit }) {
   const [timeTable, setTimeTable] = useState(null)
   const [target, setTarget] = useState(null)
-  const [timetableForm, setTimetableForm] = useState({})
+  const [timetableForm, setTimetableForm] = useState([])
   const [targetForm, setTargetForm] = useState({ subject: '', topics: '' })
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-  
+
   const updateTimetableDayData = (day, field, value) => {
+    let copyTable = [...timetableForm]
+    const entry = copyTable.find(d => d.day == day)
     setTimetableForm(prev => {
-      const currentDay = prev[day] || { subjects: '', isBreak: false, numSessions: 1, sessions: [{ start: '', end: '' }] }
-      let updatedDay = { ...currentDay, [field]: value }
+      const currentDay = entry || { day: day, subjects: '', isBreak: false, numSessions: 1, sessions: [{ start: '', end: '' }] }
+      currentDay[field] = value;
 
       // If numSessions changes, update sessions array
       if (field === 'numSessions') {
         const num = parseInt(value) || 1
-        updatedDay.sessions = Array.from({ length: num }, (_, i) =>
+        currentDay.sessions = Array.from({ length: num }, (_, i) =>
           currentDay.sessions[i] || { start: '', end: '' }
         )
       }
-
-      return { ...prev, [day]: updatedDay }
+      if (!entry) {
+        copyTable = [...copyTable, currentDay]
+      }
+      return copyTable
     })
   }
-  
+
   const transformTopics = (topicsString) => {
     return topicsString.split(',').map(topic => topic.trim()).filter(Boolean).map(name => ({
       name,
       completed: false
     }))
   }
-  
-  function sendData(e){
+
+  function sendData(e) {
     e.preventDefault()
     handleSubmit(timetableForm)
   }
@@ -38,7 +42,8 @@ function Study_Modal({ type, handleSubmit}) {
     <div>
       {type === 'timetable' ? <form onSubmit={(e) => sendData(e)}>
         {days.map((day) => {
-          const dayData = timetableForm[day] || { subjects: '', isBreak: false, numSessions: 1, sessions: [{ start: '', end: '' }] }
+          const entry = timetableForm.find(d => d.day == day)
+          const dayData = entry || { day: day, subjects: '', isBreak: false, numSessions: 1, sessions: [{ start: '', end: '' }] }
           return (
             <div key={day} className="day-entry mb-4 p-2 border">
               <label htmlFor={`day-${day}`}>{day}</label><br />
@@ -47,6 +52,7 @@ function Study_Modal({ type, handleSubmit}) {
                 type="text"
                 value={dayData.subjects}
                 onChange={(e) => updateTimetableDayData(day, 'subjects', e.target.value)}
+                className="border"
               /><br />
               <label>Make this day a break day?</label>
               <input
@@ -58,7 +64,7 @@ function Study_Modal({ type, handleSubmit}) {
                 <>
                   <label>Number of custom sessions for {day}:</label><br />
                   <input
-                    className="block"
+                    className="block border"
                     type="number"
                     min="1"
                     value={dayData.numSessions}
@@ -97,21 +103,22 @@ function Study_Modal({ type, handleSubmit}) {
         <button type="submit" className="btn-primary">Save Timetable</button>
       </form>
         :
-        <form>
-          <label>Enter the subject/course name</label>
+        <form className="px-2 py-3">
+          <label>Enter the subject/course name</label><br />
           <input
             type="text"
             value={targetForm.subject}
             onChange={(e) => setTargetForm(prev => ({ ...prev, subject: e.target.value }))}
-          />
-          <label>Enter the desired topics</label>
-          <p>Space topics with a comma (e.g microbiology,physiology,psycology e.t.c)</p>
+            className="border"
+          /><br />
+          <label>Enter the desired topics, [space topics with a comma (e.g microbiology,physiology,psycology e.t.c)]</label><br />
           <input
             type="text"
             value={targetForm.topics}
             onChange={(e) => setTargetForm(prev => ({ ...prev, topics: e.target.value }))}
-          />
-          <button type="submit" className="btn-primary">Save Target</button>
+            className="border"
+          /><br />
+          <button type="submit" className="btn-primary mt-1">Save Target</button>
         </form>
       }
     </div>
