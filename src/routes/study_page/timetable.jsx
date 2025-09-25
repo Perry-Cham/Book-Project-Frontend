@@ -41,6 +41,7 @@ function Timetable() {
       console.error(err)
     }
   }
+  const days = ["Sun", "Mon","Tue","Wed","Thu","Fri","Sat"]
   return (
     <section>
       <Dialog open={modalState.open} onClose={() => setIsOpen(false)} className="relative z-50">
@@ -77,14 +78,16 @@ function Timetable() {
       }
           <Tab.Group>
       <Tab.List>
-        <Tab>Tab 1</Tab>
-        <Tab>Tab 2</Tab>
-        <Tab>Tab 3</Tab>
+{days.map((d) => (<Tab className="py-1 px-2 mx-1 my-1" key={Math.random()}>{d}</Tab>))}
       </Tab.List>
       <Tab.Panels>
         <Tab.Panel>Content 1</Tab.Panel>
         <Tab.Panel>Content 2</Tab.Panel>
         <Tab.Panel>Content 3</Tab.Panel>
+        <Tab.Panel>Content 4</Tab.Panel>
+        <Tab.Panel>Content 5</Tab.Panel>
+        <Tab.Panel>Content 6</Tab.Panel>
+        <Tab.Panel>Content 7</Tab.Panel>
       </Tab.Panels>
     </Tab.Group>
     </section>
