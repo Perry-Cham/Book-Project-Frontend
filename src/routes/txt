@@ -1,206 +1,70 @@
-import useAuthStore from '../stores/auth_store'
-import Modal from '../components/modal'
-import { useState, useEffect } from 'react'
+const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+const todayIndex = new Date().getDay();
+console.log(todayIndex)
 
-function Study_Page() {
-  const user = useAuthStore((state) => state.user)
-  const setUser = useAuthStore((state) => state.setUser)
-  const [type, setType] = useState("")
-  const [modalState, setModalState] = useState({
-    title: "", message: "", type: "", open: false, sendData: null
-  });
-  const [timeTable, setTimeTable] = useState(null)
-  const [target, setTarget] = useState(null)
-  const [timetableForm, setTimetableForm] = useState({})
-  const [targetForm, setTargetForm] = useState({ subject: '', topics: '' })
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday","Thursday","Friday","Saturday"]
+return (
+  <section>
+    <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
+      {/* ... dialog code ... */}
+    </Dialog>
 
-  // Helper to update timetable form data for a specific day and field
-  const updateTimetableDayData = (day, field, value) => {
-    setTimetableForm(prev => {
-      const currentDay = prev[day] || { subjects: '', isBreak: false, numSessions: 1, sessions: [{ start: '', end: '' }] }
-      let updatedDay = { ...currentDay, [field]: value }
-
-      // If numSessions changes, update sessions array
-      if (field === 'numSessions') {
-        const num = parseInt(value) || 1
-        updatedDay.sessions = Array.from({ length: num }, (_, i) => 
-          currentDay.sessions[i] || { start: '', end: '' }
-        )
-      }
-
-      return { ...prev, [day]: updatedDay }
-    })
-  }
-
-  // Transform topics string to array of objects
-  const transformTopics = (topicsString) => {
-    return topicsString.split(',').map(topic => topic.trim()).filter(Boolean).map(name => ({
-      name,
-      completed: false
-    }))
-  }
-
-  // Handle timetable submit
-  const handleSubmitTimetable = (e) => {
-    e.preventDefault()
-    // Transform subjects to array for each day
-    const processedTimetable = {}
-    Object.keys(timetableForm).forEach(day => {
-      const dayData = timetableForm[day]
-      processedTimetable[day] = {
-        ...dayData,
-        subjects: dayData.subjects.split(',').map(s => s.trim()).filter(Boolean)
-      }
-    })
-    setTimeTable(processedTimetable)
-    setModalState(prev => ({ ...prev, open: false }))
-    setTimetableForm({}) // Reset form
-  }
-
-  // Handle target submit
-  const handleSubmitTarget = (e) => {
-    e.preventDefault()
-    const topicsArray = transformTopics(targetForm.topics)
-    const transformedTarget = {
-      subject: targetForm.subject.trim(),
-      topics: topicsArray
-    }
-    setTarget(transformedTarget)
-    setModalState(prev => ({ ...prev, open: false }))
-    setTargetForm({ subject: '', topics: '' }) // Reset form
-  }
-
-  const modalContent = () => {
-    if (type === "timetable") {
-      return (
-        <form onSubmit={handleSubmitTimetable}>
-          {days.map((day) => {
-            const dayData = timetableForm[day] || { subjects: '', isBreak: false, numSessions: 1, sessions: [{ start: '', end: '' }] }
-            return (
-              <div key={day} className="day-entry mb-4 p-2 border">
-                <label htmlFor={`day-${day}`}>{day}</label>
-                <label>Subjects (comma-separated):</label>
-                <input 
-                  type="text" 
-                  value={dayData.subjects}
-                  onChange={(e) => updateTimetableDayData(day, 'subjects', e.target.value)}
-                />
-                <label>Make this day a break day?</label>
-                <input 
-                  type="checkbox" 
-                  checked={dayData.isBreak}
-                  onChange={(e) => updateTimetableDayData(day, 'isBreak', e.target.checked)}
-                />
-                {!dayData.isBreak && (
+    {showTableForm && <Study_Modal type="timetable" handleSubmit={handleSubmit} />}
+    
+    {timetable && !showTableForm ? (
+      <div>
+        <div className="mb-4">
+          <h2>Study Time-Table</h2>
+          <button className="btn-secondary" onClick={() => setShowTableForm(true)}>
+            Edit Time Table
+          </button>
+        </div>
+        
+        <Tab.Group defaultIndex={todayIndex}>
+          <Tab.List className="flex border-b">
+            {days.map((d, index) => (
+              <Tab 
+                key={index}
+                className={({ selected }) => 
+                  `py-2 px-4 mx-1 border-b-2 font-medium text-sm ${
+                    selected 
+                      ? 'border-blue-500 text-blue-600' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`
+                }
+              >
+                {d}
+              </Tab>
+            ))}
+          </Tab.List>
+          <Tab.Panels className="mt-4">
+            {timetable.map((day, index) => (
+              <Tab.Panel key={index} className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-lg font-semibold">{day.day}</p>
+                {!day.isBreak ? (
                   <>
-                    <label>Number of custom sessions for {day}:</label>
-                    <input 
-                      type="number" 
-                      min="1" 
-                      value={dayData.numSessions}
-                      onChange={(e) => updateTimetableDayData(day, 'numSessions', e.target.value)}
-                    />
-                    {dayData.sessions.map((session, i) => (
-                      <div key={i} className="session-entry ml-4">
-                        <label>Session {i + 1} Start Time:</label>
-                        <input 
-                          type="time" 
-                          value={session.start}
-                          onChange={(e) => {
-                            const newSessions = [...dayData.sessions]
-                            newSessions[i] = { ...newSessions[i], start: e.target.value }
-                            updateTimetableDayData(day, 'sessions', newSessions)
-                          }}
-                        />
-                        <label>End Time:</label>
-                        <input 
-                          type="time" 
-                          value={session.end}
-                          onChange={(e) => {
-                            const newSessions = [...dayData.sessions]
-                            newSessions[i] = { ...newSessions[i], end: e.target.value }
-                            updateTimetableDayData(day, 'sessions', newSessions)
-                          }}
-                        />
-                      </div>
-                    ))}
+                    <p>From {day.sessions[0].start} to {day.sessions[0].end}:</p>
+                    <ul className="list-disc list-inside mt-2">
+                      {day.subjects.filter(sub => sub && sub.trim() !== "").map((sub, subIndex) => (
+                        <li key={subIndex}>{sub}</li>
+                      ))}
+                    </ul>
                   </>
+                ) : (
+                  <p>Today is a break day so... no studying</p>
                 )}
-              </div>
-            )
-          })}
-          <button type="submit" className="btn-primary">Save Timetable</button>
-        </form>
-      )
-    } else {
-      return (
-        <form onSubmit={handleSubmitTarget}>
-          <label>Enter the subject/course name</label>
-          <input 
-            type="text"
-            value={targetForm.subject}
-            onChange={(e) => setTargetForm(prev => ({ ...prev, subject: e.target.value }))}
-          />
-          <label>Enter the desired topics</label>
-          <p>Space topics with a comma (e.g microbiology,physiology,psycology e.t.c)</p>
-          <input 
-            type="text"
-            value={targetForm.topics}
-            onChange={(e) => setTargetForm(prev => ({ ...prev, topics: e.target.value }))}
-          />
-          <button type="submit" className="btn-primary">Save Target</button>
-        </form>
-      )
-    }
-  }
-
-  const openTimetableModal = () => {
-    setType("timetable")
-    setModalState(prev => ({ ...prev, open: true, title: "Set Timetable" }))
-  }
-
-  const openTargetModal = () => {
-    setType("target")
-    setModalState(prev => ({ ...prev, open: true, title: "Set Target Topics" }))
-  }
-
-  return (
-    <section>
-      {modalState.open && <Modal>{modalContent()}</Modal>}
-      <p>Hello, {user.name}</p>
-      <div>
-        <h2>Study Time Table</h2>
-        {timeTable ? (
-          <>
-            {/* Placeholder for rendering timetable - see advice below for examples */}
-            <p>Timetable set! (Render logic here)</p>
-          </>
-        ) : (
-          <div>
-            <h3>No Data</h3>
-            <p>You haven't set a time table yet</p>
-            <button onClick={openTimetableModal} className="btn-primary">Set Timetable</button>
-          </div>
-        )}
+              </Tab.Panel>
+            ))}
+          </Tab.Panels>
+        </Tab.Group>
       </div>
+    ) : (
       <div>
-        <h2>Target Topics</h2>
-        {target ? (
-          <>
-            {/* Placeholder for rendering target */}
-            <p>Target set for {target.subject}: {target.topics.map(t => t.name).join(', ')}</p>
-          </>
-        ) : (
-          <div>
-            <h3>No Data</h3>
-            <p>You haven't set a target yet</p>
-            <button onClick={openTargetModal} className="btn-primary">Set Target</button>
-          </div>
-        )}
+        <h2>Study Time-Table</h2>
+        <p>You haven't made a study timetable yet, when you make a new timetable you'll see it here.</p>
+        <button className="btn-secondary" onClick={() => setShowTableForm(true)}>
+          Make a new time table
+        </button>
       </div>
-    </section>
-  )
-}
-
-export default Study_Page
+    )}
+  </section>
+)

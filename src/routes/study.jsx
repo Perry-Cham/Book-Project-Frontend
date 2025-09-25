@@ -5,7 +5,7 @@ import Timetable from './study_page/timetable'
 function Study_Page(){
   const {user} = useAuthStore()
     return (
-    <section>
+    <section className="px-2">
       <p>Hello, {user.name}</p>
       <Timetable />
     </section>
