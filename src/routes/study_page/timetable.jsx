@@ -3,13 +3,13 @@ import { Dialog, Tab } from '@headlessui/react'
 import Study_Modal from './study_modal'
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
-
+import useAuthStore from '../../stores/auth_store'
 function Timetable() {
   const api = import.meta.env.VITE_API
   const [modalState, setModalState] = useState({ heading: "", message: "", open: false })
   const [timetable, setTimetable] = useState(null)
   const [showTableForm, setShowTableForm] = useState(false)
-
+  const {user} = useAuthStore()
   useEffect(() => {
     getTimeTable()
   }, [])
@@ -39,13 +39,12 @@ function Timetable() {
     })
 
     let tData = { days: transformedData }
-    console.log(transformedData)
 
     try {
       const response = await axios.post(`${api}/settimetable`, tData, { withCredentials: true })
-      if (response.status === 201) {
+      if (response.status === 200) {
         setModalState((prev) => ({ ...prev, open: true, heading: "Congratulations", message: "The timetable has been successfully sent to the server " }))
-        getTimeTable() // Refresh the timetable
+        getTimeTable()
       }
     } catch (err) {
       console.error(err)
@@ -59,9 +58,9 @@ function Timetable() {
       response.status === 200 ?
         setModalState({ heading: "Success!", message: "The operation completed successfully.", open: true }) :
         setModalState({ heading: "Failure", message: "There was an error on our end, please try again later", open: true })
-      getTimeTable() // Refresh the timetable
+      getTimeTable() 
     } catch (err) {
-      console.log(err)
+      console.error(err)
       setModalState({ heading: "Failure", message: "There was an error on our end, please try again later", open: true })
     }
   }
@@ -69,9 +68,9 @@ function Timetable() {
   async function getTimeTable() {
     try {
       const response = await axios.get(`${api}/gettimetable`, { withCredentials: true })
+      
       if (response.status === 200) {
         setTimetable(() => response.data[0]?.days || null)
-        console.log(response.data[0]?.days)
       }
     } catch (err) {
       console.error(err)
@@ -111,7 +110,7 @@ function Timetable() {
         <>
           {(timetable && !showTableForm) ? (
             <div>
-              <h2>Study Time-Table</h2>
+              <h2 className="text-center text-md font-bold"> {user.name}'s Study Time-Table</h2>
               <Tab.Group defaultIndex={todayIndex}>
                 <Tab.List>
                   {days.map((d, index) => (
@@ -149,16 +148,17 @@ function Timetable() {
                       ) : (
                         <p>Today is a break day - no studying scheduled</p>
                       )}
+              <button className="border-2 border-red-600 py-1 px-2 mt-4" onClick={() => handleDelete()}>
+                Delete Timetable
+              </button>
                     </Tab.Panel>
                   ))}
                 </Tab.Panels>
               </Tab.Group>
-              <button className="border-2 border-red-600 py-1 px-2 mt-4" onClick={() => handleDelete()}>
-                Delete Timetable
-              </button>
             </div>
           ) : (
             <div>
+
               <h2>Study Time-Table</h2>
               <p>You haven't made a study timetable yet. When you make a new timetable you'll see it here.</p>
               <button className="btn-secondary" onClick={() => setShowTableForm(true)}>
@@ -166,7 +166,6 @@ function Timetable() {
               </button>
             </div>
           )}
-          <button className="py-1 px-2 border-2 border-red-600">Delete The Timetable</button>
         </>}
 
     </section>

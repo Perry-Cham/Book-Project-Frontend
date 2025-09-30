@@ -87,15 +87,15 @@ function Study_Modal({ type, handleSubmit }) {
     }))
   }
 
-  function sendData(e) {
+  function sendData(e,data) {
     e.preventDefault()
-    handleSubmit(timetableForm)
+    handleSubmit(data)
   }
 
   return (
     <div>
       {type === 'timetable' ? 
-        <form onSubmit={(e) => sendData(e)}>
+        <form onSubmit={(e) => sendData(e,timetableForm)}>
           {days.map((day) => {
             const entry = timetableForm.find(d => d.day === day)
             const dayData = entry || { 
@@ -160,10 +160,10 @@ function Study_Modal({ type, handleSubmit }) {
               </div>
             )
           })}
-          <button type="submit" onClick={handleSubmit} className="btn-primary">Save Timetable</button>
+          <button type="submit" className="btn-primary">Save Timetable</button>
         </form>
         :
-        <form className="px-2 py-3">
+        <form className="px-2 py-3" onSubmit={(e) => sendData(e,targetForm)}>
           <label>Enter the subject/course name</label><br />
           <input
             type="text"
@@ -171,13 +171,17 @@ function Study_Modal({ type, handleSubmit }) {
             onChange={(e) => setTargetForm(prev => ({ ...prev, subject: e.target.value }))}
             className="border"
           /><br />
-          <label>Enter the desired topics, [space topics with a comma (e.g microbiology,physiology,psycology e.t.c)]</label><br />
+          <label>Enter the desired topics, [space topics with a comma (e.g microbiology,physiology, e.t.c)]</label><br />
           <input
             type="text"
             value={targetForm.topics}
             onChange={(e) => setTargetForm(prev => ({ ...prev, topics: e.target.value }))}
             className="border"
           /><br />
+          <label htmlFor="endDate">Deadline (By what day should you have completed studying these topics)</label><br />
+          <input type="date" name="endDate" 
+          value={targetForm.endDate}
+          onChange={(e) => setTargetForm(prev => ({...prev,endDate: e.target.value}))}/><br />
           <button type="submit" className="btn-primary mt-1">Save Target</button>
         </form>
       }

@@ -17,7 +17,7 @@ async  function fetchSession(){
   const userSession = await axios.get(`${api}/getsession`, {
     withCredentials:true
   });
-  console.log(userSession)
+  
   if(userSession.status == 200){
     const user2 = {
       name:userSession.data.name,
@@ -50,8 +50,8 @@ async  function fetchSession(){
   return (
  (location.pathname !== '/signin' && location.pathname !== '/signup') && <div className="relative shadow-md flex justify-between items-center py-4 pl-4 ">
       <h2 className="text-lg"><Link to='/'>P'S BOOKS</Link></h2>
-      <nav className="hidden md:block border-2">
-        <ul className="border-2 flex md:justify-center md:items-center">
+      <nav className="hidden md:block">
+        <ul className="flex md:justify-center md:items-center">
           <li className="px-4"><Link to="/home">Home</Link></li>
           <li className="px-4"><Link to="/goal">Goals</Link></li>
           <li className="px-4"><Link to="/study">Study</Link></li>
