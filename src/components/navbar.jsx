@@ -59,7 +59,7 @@ async  function fetchSession(){
         </ul>
       </nav> 
 
-      <nav className="mobile-nav absolute text-white w-[100vw]  bottom-[-230px] right-0  md:hidden flex justify-center items-center scale-0 transition-transform origin-top-right duration-300  ">
+      <nav className="mobile-nav absolute text-white w-[100vw]  bottom-[-230px] right-0  md:hidden flex justify-center items-center scale-0 transition-transform origin-top-right duration-300  z-50">
         <ul className="flex md:justify-center md:items-center flex-col gap-1 rounded-md p-2 bg-blue-800 w-[98%]">
           <li className={`px-4 py-3  ${(location.pathname == '/home' || location.pathname.startsWith('/download')) ? 'active-link' : ""}`}><Link to="/home">Home</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/goal' ? 'active-link' : ""}`}><Link to="/goal">Goals</Link></li>

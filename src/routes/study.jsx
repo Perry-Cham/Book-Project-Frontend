@@ -8,7 +8,7 @@ function Study_Page(){
   const {user} = useAuthStore()
     return (
     <section className="px-2 pt-4 pb-4">
-      <p className="text-lg font-medium mb-3">Hello, {user.name}</p>
+      <p className="text-lg font-medium mb-3">Hello {user.name}</p>
       <Timetable />
       <Topics />
     </section>

@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Book_Card from '../../components/cards/book_card'
 import Modal from '../../components/modal'
+// Import Swiper React components
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
 
 function Book_Section({ props, bookProps }) {
   const { openModal, api, modalState, setModalState } = props;
@@ -123,42 +130,75 @@ function Book_Section({ props, bookProps }) {
     }
   }
   async function handleAddCustom(data) {
-      try{
-     const response = await axios.post(`${api}/addcustombook`,data, {
-        withCredentials:true})
-        console.log(response)
-        if (response.status == 200) {
-             alert(`Congratulations you've just started ${data.title}`);
-           getCurrentBooks();
-           getSavedBooks();
-         } else {
-           alert('Error adding book');
-         }
-    }catch(err){
-         console.error(err)
-       }
+    try {
+      const response = await axios.post(`${api}/addcustombook`, data, {
+        withCredentials: true
+      })
+      console.log(response)
+      if (response.status == 200) {
+        alert(`Congratulations you've just started ${data.title}`);
+        getCurrentBooks();
+        getSavedBooks();
+      } else {
+        alert('Error adding book');
+      }
+    } catch (err) {
+      console.error(err)
+    }
   }
   return (
     <>
-      <section>
+      <section className="py-4 my-2 mx-1 bg-white rounded-sm">
+        <h2 className="text-center font-medium text-lg">Currently Reading</h2>
+        {/*}
         {modalState.open && <Modal setModalState={setModalState} modalState={modalState} />}
-        <h2>Currently Reading</h2>
+
         <button onClick={() => openModal("", "addCustomBook", handleAddCustom)} className="btn-secondary">Add Your Own Book</button>
         {cbooks ? cbooks.map((book) =>
           <Book_Card book={book} type={"currentBook"} functions={{ openModal, setPage, handleDelete }} />) :
           <div>
             <p>You haven't started reading anything yet, books you read will appear here</p>
           </div>}
-      </section>
+      */}
+        <Swiper
+          modules={[Navigation, Pagination]}
+          spaceBetween={50}
+          slidesPerView={1}
+          navigation
+          pagination={{ clickable: true }}
+          className="pb-4 px-5"
+        >
+          {cbooks ? cbooks.map((book) =>
+            <SwiperSlide><Book_Card book={book} type={"currentBook"} functions={{ openModal, setPage, handleDelete }} /></SwiperSlide>) :
+            <SwiperSlide><div>
+              <p>You haven't started reading anything yet, books you read will appear here</p>
+            </div></SwiperSlide>}
 
-      <section>
-        <h2>Saved Books</h2>
-        {sbooks ? sbooks.map((book) =>
+        </Swiper>
+      </section>
+      <section className="pt-4 my-2 mx-1 bg-white rounded-sm">
+        <h2 className="text-center font-medium text-lg">Saved Books</h2>
+                <Swiper
+          modules={[Navigation, Pagination]}
+          spaceBetween={50}
+          slidesPerView={1}
+          navigation
+          pagination={{ clickable: true }}
+          className="pb-4 px-5"
+        >
+          {sbooks ? sbooks.map((book) =>
+            <SwiperSlide><Book_Card book={book} type={"savedBook"} functions={{ openModal, setPage, handleDelete }} /></SwiperSlide>) :
+            <SwiperSlide><div>
+              <p>You haven't started reading anything yet, books you read will appear here</p>
+            </div></SwiperSlide>}
+
+        </Swiper>
+        {/*sbooks ? sbooks.map((book) =>
           <Book_Card book={book} type={"savedBook"} functions={{ openModal, setPage, handleDelete }} />
         ) :
           <div>
             <p>You haven't saved anything yet, books you save will appear here</p>
-          </div>}
+          </div>*/}
       </section>
     </>
   );

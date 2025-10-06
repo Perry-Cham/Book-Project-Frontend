@@ -23,7 +23,7 @@ function Goal_Page() {
 const commonProps = {openModal:openModal, api:api, modalState:modalState, setModalState:setModalState}
 const bookProps = {sbooks:sbooks, setSbooks:setSbooks, cbooks:cbooks, setCbooks:setCbooks} 
   return (
-    <div className="px-2 pt-2 pb-4">
+    <div className="px-2 pt-2 pb-4 bg-gray-200">
       <h2 className="text-lg font-medium">Hello, {user.name && user.name}</h2>
       <Book_Section props={commonProps} bookProps={bookProps}/>
   <Goal_Section props={commonProps} bookProps={bookProps}/>

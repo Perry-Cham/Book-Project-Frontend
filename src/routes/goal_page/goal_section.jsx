@@ -69,9 +69,9 @@ function Goal_Section({ props, bookProps }) {
   }
 
   return (
-    <section>
+    <section className="mx-1 my-2 bg-white rounded-sm py-4 px-2">
       {modalState.open && <Modal modalState={modalState} setModalState={setModalState} />}
-      <h2>Reading Goals</h2>
+      <h2 className="font-medium text-lg">Reading Goals</h2>
       {goal ?
         <div>
           <p>Books to read: {goal.goal.numberOfBooks}</p>
@@ -105,7 +105,7 @@ function Goal_Section({ props, bookProps }) {
         </div> :
         <div>
           <p>Build a reading habit by setting a reading goal. Once you set one it'll appear here</p>
-          <button className="btn-primary" onClick={() => openModal("", "setGoal", handleGoal)}>Set Goal</button>
+          <button className="btn-primary mt-3" onClick={() => openModal("", "setGoal", handleGoal)}>Set Goal</button>
         </div>
       }
     </section>

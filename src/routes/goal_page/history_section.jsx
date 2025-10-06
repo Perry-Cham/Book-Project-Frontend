@@ -122,8 +122,8 @@ console.log(pagesRead)
   };
   
   return (
-    <section>
-      <h2>Reading History</h2>
+    <section className="py-4 px-2 my-2 mx-1 bg-white rounded-sm">
+      <h2 className="font-medium text-lg">Reading History</h2>
       {chartData ? (
         <div className="h-[45vh]">
           <Line  options={options} data={chartData} />
