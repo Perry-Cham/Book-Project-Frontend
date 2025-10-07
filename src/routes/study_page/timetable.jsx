@@ -81,7 +81,7 @@ function Timetable() {
   const todayIndex = new Date().getDay();
 
   return (
-    <section>
+    <section className="bg-white pt-3 rounded-md">
       <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">

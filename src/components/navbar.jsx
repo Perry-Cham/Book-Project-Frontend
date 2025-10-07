@@ -1,10 +1,11 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import axios from 'axios'
 import useAuthStore from '../stores/auth_store'
 import { Bars3Icon as Bars } from '@heroicons/react/24/solid'
 
 function Navigation_Bar() {
+  const [open, setOpen] = useState(false)
   const navigate = useNavigate();
   const location = useLocation();
   const setUser = useAuthStore((state) => state.setUser)
@@ -40,7 +41,11 @@ async  function fetchSession(){
       const response = await axios.get(`${api}/logout`, {
         withCredentials:true
       })
-      if (response.status == 200) navigate('/'); else alert('logout failed')
+      if (response.status == 200){ 
+        navigate('/')
+        console.log(response)
+        setOpen(false)
+      } else alert('logout failed')
     } catch (err) {
       console.error(err)
       alert('failed')
@@ -59,7 +64,7 @@ async  function fetchSession(){
         </ul>
       </nav> 
 
-      <nav className="mobile-nav absolute text-white w-[100vw]  bottom-[-230px] right-0  md:hidden flex justify-center items-center scale-0 transition-transform origin-top-right duration-300  z-50">
+      <nav className={`mobile-nav absolute text-white w-[100vw]  bottom-[-230px] right-0  md:hidden flex justify-center items-center scale-0 transition-transform origin-top-right duration-300  z-50 ${open && "scale-100"}`}>
         <ul className="flex md:justify-center md:items-center flex-col gap-1 rounded-md p-2 bg-blue-800 w-[98%]">
           <li className={`px-4 py-3  ${(location.pathname == '/home' || location.pathname.startsWith('/download')) ? 'active-link' : ""}`}><Link to="/home">Home</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/goal' ? 'active-link' : ""}`}><Link to="/goal">Goals</Link></li>
@@ -68,7 +73,7 @@ async  function fetchSession(){
         </ul>
       </nav>
 
-      <Bars className="size-7 md:hidden" onClick={handleNav} />
+      <Bars className="size-7 md:hidden" onClick={() => setOpen(!open)} />
     </div>
 
   )

@@ -56,10 +56,21 @@ function Topics() {
       getTopics()
     }
   }
+  async function handleTopicComplete(topic){
+    const data = {...goalData}
+   for(const subject of data){
+     const index = subject.topics.findIndex(el => el.name == topic)
+     if(index > -1){
+       subject.topics[index].completed = true;
+       break;
+     }
+   }
+  }
   return (
-    <section>
+    <section className="bg-white rounded-md py-3 mt-5">
       {(showForm) && <Study_Modal type="topics" handleSubmit={handleSubmit} />}
-      <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
+
+  <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="mx-auto max-w-4xl rounded bg-white p-6">
@@ -80,12 +91,10 @@ function Topics() {
           </Dialog.Panel>
         </div>
       </Dialog>
-
-
       <div>
         {(goalData && !showForm) && (
           <>
-            <h2 className="text-center text-md font-bold mt-8">{user.name} Study Targets</h2>
+            <h2 className="text-center text-md font-bold">{user.name} Study Targets</h2>
             <Tab.Group className="px-3 py-2">
               <Tab.List>
                 {goalData && goalData.map(subject => (
@@ -100,8 +109,10 @@ function Topics() {
                 <h3 className="">Topics</h3>
                 <ul>
                   {subject.topics.map(topic => (
-                    <li className="list-disc list-inside" key={Math.random() + Date.now()}>
+                    <li onClick={() => handleTopicComplete(topic.name)}className="list-disc list-inside" key={Math.random() + Date.now()}>
                       {topic.name}
+                      {String(topic.completed)}
+                      {console.log(topic.completed)}
                     </li>))}
                 </ul>
                 <p>Deadline: {subject.endDate}</p>

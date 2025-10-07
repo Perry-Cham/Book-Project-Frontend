@@ -184,7 +184,7 @@ function Book_Section({ props, bookProps }) {
           slidesPerView={1}
           navigation
           pagination={{ clickable: true }}
-          className="pb-4 px-5"
+          className="pb-4 px-2"
         >
           {sbooks ? sbooks.map((book) =>
             <SwiperSlide><Book_Card book={book} type={"savedBook"} functions={{ openModal, setPage, handleDelete }} /></SwiperSlide>) :

@@ -30,7 +30,7 @@ async function handleSubmit(e) {
   }
 
 return (
-  <section className="flex justify-center items-center h-[100vh] bg-gray-200">
+  <section className="flex justify-center items-center h-[100vh] bg-theme">
   <form className="rounded-md shadow-md p-4 bg-white h-1/2 max-h-[325px] w-[300px]" onSubmit={(e) => handleSubmit(e)} method="POST" action={type === "login" ? `${api}/signin` : `${api}/signup`}>
     <h2 className="text-xl font-bold mb-3">{type == 'login' ? 'Sign In' : 'Sign Up'}</h2>
     <label for="name">Username</label>

@@ -18,7 +18,7 @@ function Modal({ modalState, setModalState }) {
   }
 
   return (
-    open && <div className="w-[100vw] h-[100vh] bg-black bg-opacity-75 fixed top-0 left-0 flex justify-center items-center">
+    open && <div className="w-[100vw] h-[100vh] bg-black bg-opacity-75 fixed top-0 left-0 flex justify-center items-center z-50">
 
       <div className="p-[1.75rem] bg-white rounded-md md:w-[300px] min-w-[200px]">
         <XMarkIcon onClick={handleClose} className="size-6 cursor-pointer text-right" />
