@@ -7,6 +7,7 @@ import LandingPage from './routes/landing'
 import Goal_Page from './routes/goal'
 import Study_Page from './routes/study'
 import Download_Page from './routes/download'
+import Library_Page from './routes/library'
 import Auth from './routes/auth'
 import Home from './routes/home'
 import './css/styles.css'
@@ -42,6 +43,10 @@ function App() {
         {
           path: '/download/:id',
           element: <Download_Page />
+        },
+        {
+          path: '/library',
+          element: <Library_Page />
         },
         {
           path: '/home',
