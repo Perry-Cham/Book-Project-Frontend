@@ -1,10 +1,10 @@
 import { openDB } from 'idb';
-import { useState, useEffect,useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ReactReader } from 'react-reader';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { Dialog} from '@headlessui/react'
+import { Dialog } from '@headlessui/react'
 import PdfReader from '../components/PDFreader/index.jsx'
-import EpubReader from  '../components/Epubreader/index.jsx'
+import EpubReader from '../components/Epubreader/index.jsx'
 
 
 function LibraryPage() {
@@ -13,12 +13,23 @@ function LibraryPage() {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [url, setUrl] = useState("")
-  const [modalState, setModalState] = useState({open:false, message:"", title:""})
-const viewerRef = useRef(null);
+  const [modalState, setModalState] = useState({ open: false, message: "", title: "" })
+
   useEffect(() => {
     listAllBooks();
   }, []);
-
+  useEffect(() => {
+    async function foo() {
+      if (bookToRead) {
+        const db = await openDB('App',1)
+        const book = await db.get('Books', bookToRead.id)
+        if(!book.numPages)book.totalPages = numPages;
+        book.page = pageNumber
+       await db.put("Books", book)
+      }
+    }
+        foo()
+  }, [pageNumber])
   async function storeBook(e) {
     const files = e.target.files;
     if (!files.length) return;
@@ -46,7 +57,7 @@ const viewerRef = useRef(null);
         };
         await db.put('Books', entry);
       }
-      setModalState(prev =>({open:true, message:"The book has been added successfully", title:"success"}))
+      setModalState(prev => ({ open: true, message: "The book has been added successfully", title: "success" }))
       await listAllBooks(); // Refresh the book list
     } catch (err) {
       console.error('Error storing book:', err);
@@ -65,30 +76,31 @@ const viewerRef = useRef(null);
       const fileHandle = await booksDir.getFileHandle(book.name);
       const file = await fileHandle.getFile();
       const fileType = book.name.split('.').pop().toLowerCase();
-      setBookToRead({ file, type: fileType });
+      setBookToRead({ file, type: fileType, id: book.id });
+      setPageNumber(book.page)
       setUrl(URL.createObjectURL(file))
     } catch (err) {
       console.error('Error getting book:', err);
       alert('Failed to open book');
     }
   }
-async function deleteBook(id){
-  try{
-  const db = await openDB('App',1)
-  const book = await db.get("Books",id)
-  const root = await  navigator.storage.getDirectory()
-  const booksDir = await root.getDirectoryHandle('books')
-  const file = await booksDir.getFileHandle(book.name)
-  console.log(file)
-  await file.remove()
-  await db.delete('Books',id)
-  listAllBooks()
-  setModalState(prev =>({open:true, message:"The book has been deleted successfully", title:"success"}))
-  }catch(err){
-    console.err(err)
-    alert(err)
+  async function deleteBook(id) {
+    try {
+      const db = await openDB('App', 1)
+      const book = await db.get("Books", id)
+      const root = await navigator.storage.getDirectory()
+      const booksDir = await root.getDirectoryHandle('books')
+      const file = await booksDir.getFileHandle(book.name)
+      console.log(file)
+      await file.remove()
+      await db.delete('Books', id)
+      listAllBooks()
+      setModalState(prev => ({ open: true, message: "The book has been deleted successfully", title: "success" }))
+    } catch (err) {
+      console.err(err)
+      alert(err)
+    }
   }
-}
   async function listAllBooks() {
     try {
       const db = await openDB('App', 1, {
@@ -111,49 +123,28 @@ async function deleteBook(id){
 
   return bookToRead ? (
     <section style={{ height: '100vh' }}>
-      <button onClick={() => setBookToRead(null)}>Back to Library</button>
+      <button className="absolute z-50 right-[2rem] bg-red-500 rounded-md px-2 py-1 text-white" onClick={() => setBookToRead(null)}>Back to Library</button>
       {bookToRead.type === 'epub' ? (
-      <>
-      { /* <ReactReader
-          url={bookToRead.file}
-          title={bookToRead.name || ''}
-          location={'epubcfi(/6/2[cover]!/4/1/10)'}
-          locationChanged={(epubcifi) => console.log('EPUB CFI:', epubcifi)}
-        />*/}
-        <div style={{ position: "relative"
-        }}>
-    {url && <EpubReader
+        <>
+          <ReactReader
+            url={bookToRead.file}
+            title={bookToRead.name || ''}
+            location={'epubcfi(/6/2[cover]!/4/1/10)'}
+            locationChanged={(epubcifi) => console.log('EPUB CFI:', epubcifi)}
+          />
+          <div style={{
+            position: "relative"
+          }}>
+            {/*url && <EpubReader
         url={bookToRead.file}
         VIEWER_TYPE = {'EpubViewer'}
-      />}
-    </div>
-      </>
+      />*/}
+          </div>
+        </>
       ) : bookToRead.type === 'pdf' && (
         <div>
-      {/*<Document file={bookToRead.file} onLoadSuccess={onDocumentLoadSuccess}>
-            <Page pageNumber={pageNumber} />
-          </Document>
-          <p>
-            Page {pageNumber} of {numPages || 'Loading...'}
-            {numPages && (
-              <div>
-                <button
-                  onClick={() => setPageNumber((prev) => Math.max(1, prev - 1))}
-                  disabled={pageNumber <= 1}
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setPageNumber((prev) => Math.min(numPages, prev + 1))}
-                  disabled={pageNumber >= numPages}
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </p>*/}
           <>
-          <PdfReader pdfFilePath={url}/>
+            <PdfReader pdfFilePath={url} pageNumber={pageNumber} setPageNumber={setPageNumber} setNumPages={setNumPages} />
           </>
         </div>
       )}
@@ -161,7 +152,7 @@ async function deleteBook(id){
   ) : (
     <section>
       <p>Hello User</p>
-          <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
+      <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="mx-auto max-w-4xl rounded bg-white p-6">
@@ -191,11 +182,11 @@ async function deleteBook(id){
       <div>
         {books.length > 0 ? (
           books.map((book) => (
-            <div key={book.id}>
-              <p>Placeholder image</p>
+            <div className="px-2 py-1 w-[300px] mt-2 shadow-lg" key={book.id}>
+              <div>Placeholder Img</div>
               <p>{book.name}</p>
-              <button onClick={() => getBook(book.id)}>Read Book</button>
-              <button onClick={() => deleteBook(book.id)}>Delete Book</button>
+              <button className="btn-primary" onClick={() => getBook(book.id)}>Read Book</button>
+              <button className="btn-red ml-3" onClick={() => deleteBook(book.id)}>Delete Book</button>
             </div>
           ))
         ) : (

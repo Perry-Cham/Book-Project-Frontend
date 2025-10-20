@@ -60,6 +60,7 @@ async  function fetchSession(){
           <li className="px-4"><Link to="/home">Home</Link></li>
           <li className="px-4"><Link to="/goal">Goals</Link></li>
           <li className="px-4"><Link to="/study">Study</Link></li>
+          <li className="px-4"><Link to="/library">Library</Link></li>
           <li className="px-4" onClick={handleLogout}>Logout</li>
         </ul>
       </nav> 
@@ -69,6 +70,7 @@ async  function fetchSession(){
           <li className={`px-4 py-3  ${(location.pathname == '/home' || location.pathname.startsWith('/download')) ? 'active-link' : ""}`}><Link to="/home">Home</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/goal' ? 'active-link' : ""}`}><Link to="/goal">Goals</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/study' ? 'active-link' : ""}`}><Link to="/study">Study</Link></li>
+          <li className={`px-4 py-3  ${location.pathname == '/study' ? 'active-link' : ""}`}><Link to="/library">Library</Link></li>
           <li className="px-4 py-3" onClick={handleLogout}>Logout</li>
         </ul>
       </nav>

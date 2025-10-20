@@ -43,7 +43,7 @@ return (
      <br />
     <p>Forgot Password...</p>
     <button className="mt-3 rounded-sm bg-blue-700 text-white px-2 py-1 font-medium">{type == "login" ? "Sign In" : "Sign Up"}</button>
-    {type == "login" && <p className="my-5">Don't have an account? <Link className="text-blue-700 font-medium" to='/Sign Up'>Sign Up</Link></p>}
+    {type == "login" && <p className="my-5">Don't have an account? <Link className="text-blue-700 font-medium" to='/signup'>Sign Up</Link></p>}
   </form>
   </section>
 )

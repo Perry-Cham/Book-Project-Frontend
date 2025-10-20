@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { usePDFSlick } from "@pdfslick/react";
+import { PDFSlick, usePDFSlick } from "@pdfslick/react";
 import Toolbar from "./Toolbar";
 import Thumbsbar from "./Thumbsbar";
 
 
 
-export default function PDFViewerApp({ pdfFilePath }) {
+export default function PDFViewerApp({ pdfFilePath,setPageNumber,pageNumber,setNumPages }) {
   const [isThumbsbarOpen, setIsThumbsbarOpen] = useState(false);
   const [loadedPerc, setLoadedPerc] = useState(0);
   const {
@@ -27,12 +27,20 @@ export default function PDFViewerApp({ pdfFilePath }) {
     },
   });
 
+  
+  const totalPages = usePDFSlickStore(s => s.numPages)
+  const currPage = usePDFSlickStore(s => s.pageNumber)
+  const pdfslick = usePDFSlickStore(s => s.pdfSlick)
   useEffect(() => {
     if (isDocumentLoaded) {
       setIsThumbsbarOpen(true);
+      setNumPages(totalPages)
     }
   }, [isDocumentLoaded]);
-
+ 
+  useEffect(() => {
+   if(pageNumber && pdfslick)pdfslick.gotoPage(pageNumber)
+  },[])
   return (
     <>
       <div className="absolute inset-0 bg-slate-200/70 flex flex-col pdfSlick">

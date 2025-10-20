@@ -7,7 +7,7 @@ export default defineConfig({
   ],
   resolve:{
     alias:{
-      'a':resolve(__dirname,'./src'),
+      '@':resolve(__dirname,'./src'),
     }
   }
 })

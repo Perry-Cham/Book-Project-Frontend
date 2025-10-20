@@ -4,7 +4,7 @@ import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 // Set the worker source for PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-const PdfViewer = ({ pdfUrl }) => {
+const PdfViewer = ({ pdfUrl,setPage,page }) => {
   console.log(pdfUrl)
   const link = URL.createObjectURL(pdfUrl)
   const canvasRef = useRef(null);
