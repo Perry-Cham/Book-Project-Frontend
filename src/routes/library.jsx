@@ -28,11 +28,7 @@ function LibraryPage() {
     await rendition.book.rendered
     await rendition.book.ready
     console.log("Rendered")
-
-    console.log(rendition.currentLocation)
-    const displayed = rendition.currentLocation;
-    const currentPage = displayed().start.displayed.page;
-    const totalPages = displayed().start.displayed.total;
+    await renditionRef.current.book.locations.generate(1000)
   }
   async function storeBook(e) {
     const files = e.target.files;
@@ -54,10 +50,13 @@ function LibraryPage() {
         await writable.write(file);
         await writable.close();
         const entry = {
-          name: file.name,
+          name: null,
+          filename: file.name,
           page: 1,
           totalPages: undefined,
           filePath: `books/${file.name}`,
+          progress: 0,
+          epubcfi: null
         };
         await db.put('Books', entry);
       }
@@ -77,10 +76,11 @@ function LibraryPage() {
 
       const root = await navigator.storage.getDirectory();
       const booksDir = await root.getDirectoryHandle('books', { create: false });
-      const fileHandle = await booksDir.getFileHandle(book.name);
+      const fileHandle = await booksDir.getFileHandle(book.filename);
       const file = await fileHandle.getFile();
-      const fileType = book.name.split('.').pop().toLowerCase();
-      setBookToRead({ file, type: fileType, id: book.id, lastPage: book.page });
+      const fileType = book.filename.split('.').pop().toLowerCase();
+      setBookToRead({ file, type: fileType, id: book.id, lastPage: book.page});
+      setLocation(book.epubcfi || 0);
       setPageNumber(book.page)
       if (fileType === 'pdf') {
         const fileUrl = URL.createObjectURL(file);
@@ -98,20 +98,21 @@ function LibraryPage() {
       alert('Failed to open book');
     }
   }
+
   async function deleteBook(id) {
     try {
       const db = await openDB('App', 1)
       const book = await db.get("Books", id)
       const root = await navigator.storage.getDirectory()
       const booksDir = await root.getDirectoryHandle('books')
-      const file = await booksDir.getFileHandle(book.name)
+      const file = await booksDir.getFileHandle(book.filename)
       console.log(file)
       await file.remove()
       await db.delete('Books', id)
       listAllBooks()
       setModalState(prev => ({ open: true, message: "The book has been deleted successfully", title: "success" }))
     } catch (err) {
-      console.err(err)
+      console.error(err)
       alert(err)
     }
   }
@@ -133,8 +134,16 @@ function LibraryPage() {
   async function closeBook() {
     const db = await openDB('App', 1)
     const book = await db.get('Books', bookToRead.id)
-    book.totalPages = numPages;
-    book.page = pageNumber
+    if (bookToRead.type === 'pdf') {
+      book.totalPages = numPages;
+      book.page = pageNumber;
+      book.progress = (pageNumber / numPages) * 100;
+    }else{
+      book.progress = renditionRef.current?.book.locations?.percentageFromCfi(location) * 100;
+      book.epubcfi = location;
+      book.name = renditionRef.current?.book?.packaging.metadata?.title
+    }
+
     await db.put("Books", book)
     setBookToRead(null);
     setUrl("");
@@ -154,17 +163,16 @@ function LibraryPage() {
             tocChanged={(_toc) => (tocRef.current = _toc)}
             locationChanged={(loc) => {
               setLocation(loc)
-              if (renditionRef.current && tocRef.current) {
-                const { displayed, href } = renditionRef.current.location.start
-                const chapter = tocRef.current.find((item) => item.href === href)
-                console.log(chapter, href, tocRef.current
-                  `Page ${displayed.page} of ${displayed.total} in  ${chapter ? chapter.label : 'n/a'
-                  }`
-                )
+              if(!(/\.xhtml$/i.test(loc))) {
+                console.log(loc)
+                const currentLocation = renditionRef.current?.book.locations?.percentageFromCfi(loc);
+                console.log("Current location percentage:", currentLocation);
               }
             }}
             getRendition={(rendition) => handleRendition(rendition)}
             epubOptions={{
+              allowScriptedContent: true, // Enable scripts in the EPUB iframe
+              allowPopups: true, // Optional: allow popups if needed
               openAs: 'epub'
             }}
           />
@@ -212,7 +220,7 @@ function LibraryPage() {
           books.map((book) => (
             <div className="px-2 py-1 w-[300px] mt-2 shadow-lg" key={book.id}>
               <div>Placeholder Img</div>
-              <p>{book.name}</p>
+              <p>{book.name || book.filename}</p>
               <button className="btn-primary" onClick={() => getBook(book.id)}>Read Book</button>
               <button className="btn-red ml-3" onClick={() => deleteBook(book.id)}>Delete Book</button>
             </div>
