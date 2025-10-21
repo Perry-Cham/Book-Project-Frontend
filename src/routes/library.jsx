@@ -12,6 +12,7 @@ function LibraryPage() {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [location, setLocation] = useState(0)
+  const tocRef = useRef(null)
   const renditionRef = useRef(location)
   const [url, setUrl] = useState("")
   const [modalState, setModalState] = useState({ open: false, message: "", title: "" })
@@ -22,6 +23,7 @@ function LibraryPage() {
 
   async function handleRendition(rendition) {
     console.log("Rendition ready", rendition);
+    renditionRef.current = rendition;
     //get current and total pages
     await rendition.book.rendered
     await rendition.book.ready
@@ -149,11 +151,21 @@ function LibraryPage() {
           <ReactReader
             url={bookToRead.file}
             location={location}
-            locationChanged={(epubcfi) => setLocation(epubcfi)}
+            tocChanged={(_toc) => (tocRef.current = _toc)}
+            locationChanged={(loc) => {
+              setLocation(loc)
+              if (renditionRef.current && tocRef.current) {
+                const { displayed, href } = renditionRef.current.location.start
+                const chapter = tocRef.current.find((item) => item.href === href)
+                console.log(chapter, href, tocRef.current
+                  `Page ${displayed.page} of ${displayed.total} in  ${chapter ? chapter.label : 'n/a'
+                  }`
+                )
+              }
+            }}
             getRendition={(rendition) => handleRendition(rendition)}
             epubOptions={{
-              allowScriptedContent: true, // Enable scripts in the EPUB iframe
-              allowPopups: true, // Optional: allow popups if needed
+              openAs: 'epub'
             }}
           />
         </>
