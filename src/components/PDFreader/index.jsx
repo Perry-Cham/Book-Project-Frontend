@@ -35,12 +35,17 @@ export default function PDFViewerApp({ pdfFilePath,setPageNumber,pageNumber,setN
     if (isDocumentLoaded) {
       setIsThumbsbarOpen(true);
       setNumPages(totalPages)
+      console.log(pageNumber)
+      if(pageNumber && pdfslick)pdfslick.gotoPage(pageNumber)
     }
   }, [isDocumentLoaded]);
  
   useEffect(() => {
-   if(pageNumber && pdfslick)pdfslick.gotoPage(pageNumber)
+   
   },[])
+useEffect(() => {
+setPageNumber(currPage)
+}, [currPage])
   return (
     <>
       <div className="absolute inset-0 bg-slate-200/70 flex flex-col pdfSlick">

@@ -2,23 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, } from 'react';
 import { Book } from 'epubjs';
 // style
 import styles from './styles';
-/**
- * EpubViewer Module
- * @class
- * @param props
- * @param props.url Epub path
- * @param props.epubFileOptions Epub file option
- * @param props.epubOptions Epub viewer option
- * @param props.style Epub Wrapper style
- * @param props.location Epub CFI or href
- * @param props.bookChanged Run when book changed
- * @param props.rendtionChanged Run when rendition changed
- * @param props.pageChanged Run when page changed
- * @param props.tocChanged Run when toc changed
- * @param props.selectionChanged Run when selected
- * @param props.loadingView Loading Component
- * @param ref Viewer ref
- */
+
 const EpubViewer = ({ url, epubFileOptions, epubOptions, style, location, bookChanged, rendtionChanged, pageChanged, tocChanged, selectionChanged, loadingView, }, ref) => {
     // TODO Fix the ref type correctly instead 'any' type.
     const viewerStyle = style ? { ...styles, ...style } : styles;
@@ -26,11 +10,7 @@ const EpubViewer = ({ url, epubFileOptions, epubOptions, style, location, bookCh
     const [book, setBook] = useState(null);
     const [rendition, setRendition] = useState(null);
     const currentCfi = useRef('');
-    /**
-     * Move page
-     * @method
-     * @param type direction
-     */
+   
     const movePage = useCallback((type) => {
         if (!rendition)
             return;

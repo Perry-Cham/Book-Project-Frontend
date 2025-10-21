@@ -1,7 +1,6 @@
 import { openDB } from 'idb';
 import { useState, useEffect, useRef } from 'react';
 import { ReactReader } from 'react-reader';
-import { Document, Page, pdfjs } from 'react-pdf';
 import { Dialog } from '@headlessui/react'
 import PdfReader from '../components/PDFreader/index.jsx'
 import EpubReader from '../components/Epubreader/index.jsx'
@@ -12,24 +11,27 @@ function LibraryPage() {
   const [books, setBooks] = useState([]);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [location, setLocation] = useState(0)
+  const renditionRef = useRef(location)
   const [url, setUrl] = useState("")
   const [modalState, setModalState] = useState({ open: false, message: "", title: "" })
 
   useEffect(() => {
     listAllBooks();
   }, []);
-  useEffect(() => {
-    async function foo() {
-      if (bookToRead) {
-        const db = await openDB('App',1)
-        const book = await db.get('Books', bookToRead.id)
-        if(!book.numPages)book.totalPages = numPages;
-        book.page = pageNumber
-       await db.put("Books", book)
-      }
-    }
-        foo()
-  }, [pageNumber])
+
+  async function handleRendition(rendition) {
+    console.log("Rendition ready", rendition);
+    //get current and total pages
+    await rendition.book.rendered
+    await rendition.book.ready
+    console.log("Rendered")
+
+    console.log(rendition.currentLocation)
+    const displayed = rendition.currentLocation;
+    const currentPage = displayed().start.displayed.page;
+    const totalPages = displayed().start.displayed.total;
+  }
   async function storeBook(e) {
     const files = e.target.files;
     if (!files.length) return;
@@ -76,9 +78,19 @@ function LibraryPage() {
       const fileHandle = await booksDir.getFileHandle(book.name);
       const file = await fileHandle.getFile();
       const fileType = book.name.split('.').pop().toLowerCase();
-      setBookToRead({ file, type: fileType, id: book.id });
+      setBookToRead({ file, type: fileType, id: book.id, lastPage: book.page });
       setPageNumber(book.page)
-      setUrl(URL.createObjectURL(file))
+      if (fileType === 'pdf') {
+        const fileUrl = URL.createObjectURL(file);
+        console.log(fileUrl)
+        setUrl(fileUrl);
+      } else if (fileType === 'epub') {
+        const arrayBuffer = await file.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: 'application/epub+zip' });
+        const fileUrl = URL.createObjectURL(blob);
+        setUrl(fileUrl);
+      }
+
     } catch (err) {
       console.error('Error getting book:', err);
       alert('Failed to open book');
@@ -116,35 +128,39 @@ function LibraryPage() {
       console.error('Error listing books:', err);
     }
   }
-
-  function onDocumentLoadSuccess({ numPages }) {
-    setNumPages(numPages);
+  async function closeBook() {
+    const db = await openDB('App', 1)
+    const book = await db.get('Books', bookToRead.id)
+    book.totalPages = numPages;
+    book.page = pageNumber
+    await db.put("Books", book)
+    setBookToRead(null);
+    setUrl("");
   }
 
   return bookToRead ? (
     <section style={{ height: '100vh' }}>
-      <button className="absolute z-50 right-[2rem] bg-red-500 rounded-md px-2 py-1 text-white" onClick={() => setBookToRead(null)}>Back to Library</button>
+      <button className="absolute z-50 right-[2rem] bg-red-500 rounded-md px-2 py-1 text-white" onClick={() => {
+        closeBook()
+
+      }}>Back to Library</button>
       {bookToRead.type === 'epub' ? (
         <>
           <ReactReader
             url={bookToRead.file}
-            title={bookToRead.name || ''}
-            location={'epubcfi(/6/2[cover]!/4/1/10)'}
-            locationChanged={(epubcifi) => console.log('EPUB CFI:', epubcifi)}
+            location={location}
+            locationChanged={(epubcfi) => setLocation(epubcfi)}
+            getRendition={(rendition) => handleRendition(rendition)}
+            epubOptions={{
+              allowScriptedContent: true, // Enable scripts in the EPUB iframe
+              allowPopups: true, // Optional: allow popups if needed
+            }}
           />
-          <div style={{
-            position: "relative"
-          }}>
-            {/*url && <EpubReader
-        url={bookToRead.file}
-        VIEWER_TYPE = {'EpubViewer'}
-      />*/}
-          </div>
         </>
       ) : bookToRead.type === 'pdf' && (
         <div>
           <>
-            <PdfReader pdfFilePath={url} pageNumber={pageNumber} setPageNumber={setPageNumber} setNumPages={setNumPages} />
+            <PdfReader pdfFilePath={url} pageNumber={bookToRead.lastPage} setPageNumber={setPageNumber} setNumPages={setNumPages} />
           </>
         </div>
       )}
