@@ -134,11 +134,40 @@ function LibraryPage() {
   async function closeBook() {
     const db = await openDB('App', 1)
     const book = await db.get('Books', bookToRead.id)
+
     if (bookToRead.type === 'pdf') {
-      book.totalPages = numPages;
-      book.page = pageNumber;
-      book.progress = (pageNumber / numPages) * 100;
-    }else{
+      try {
+        // Try to use pdfjs if available on window, otherwise dynamic import
+        let pdfjsLib = window['pdfjs-dist/build/pdf']
+        if (!pdfjsLib) {
+          const imported = await import('pdfjs-dist/build/pdf')
+          // some bundlers put the lib on default, others export directly
+          pdfjsLib = imported.default || imported
+        }
+
+        const loadingTask = pdfjsLib.getDocument(url)
+        const pdf = await loadingTask.promise
+        const metadata = await pdf.getMetadata()
+
+        // Prefer the info Title, then XMP metadata dc:title, then filename
+        const titleFromInfo = metadata?.info?.Title
+        const titleFromXmp = metadata?.metadata && typeof metadata.metadata.get === 'function'
+          ? metadata.metadata.get('dc:title')
+          : null
+        const title = titleFromInfo || titleFromXmp || book.filename
+
+        book.name = title
+        book.totalPages = numPages || pdf.numPages
+        book.page = pageNumber
+        book.progress = (pageNumber / (book.totalPages || 1)) * 100
+      } catch (err) {
+        console.error('Error reading PDF metadata:', err)
+        // Fallback: save what we have
+        book.totalPages = numPages
+        book.page = pageNumber
+        book.progress = (pageNumber / (numPages || 1)) * 100
+      }
+    } else {
       book.progress = renditionRef.current?.book.locations?.percentageFromCfi(location) * 100;
       book.epubcfi = location;
       book.name = renditionRef.current?.book?.packaging.metadata?.title
