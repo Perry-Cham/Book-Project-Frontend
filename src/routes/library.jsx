@@ -3,8 +3,8 @@ import { useState, useEffect, useRef } from 'react';
 import { ReactReader } from 'react-reader';
 import { Dialog } from '@headlessui/react'
 import PdfReader from '../components/PDFreader/index.jsx'
-import EpubReader from '../components/Epubreader/index.jsx'
-
+import useNavStore from '../stores/nav_state_store.js';
+import axios, { all } from 'axios'
 
 function LibraryPage() {
   const [bookToRead, setBookToRead] = useState(null);
@@ -16,6 +16,8 @@ function LibraryPage() {
   const renditionRef = useRef(location)
   const [url, setUrl] = useState("")
   const [modalState, setModalState] = useState({ open: false, message: "", title: "" })
+  const navIsOpen = useNavStore(state => state.isOpen)
+  const setNavIsOpen = useNavStore(state => state.setIsOpen)
 
   useEffect(() => {
     listAllBooks();
@@ -30,6 +32,34 @@ function LibraryPage() {
     console.log("Rendered")
     await renditionRef.current.book.locations.generate(1000)
   }
+
+  async function getImage(title) {
+    // Check if browser is online
+    if (!navigator.onLine) {
+      console.log('Browser is offline, skipping cover image fetch');
+      return null;
+    }
+
+    try {
+      // Fetch book data from Open Library API
+      const query = `title:${encodeURIComponent(title)}`;
+      const response = await axios.get(`https://openlibrary.org/search.json?q=${query}&limit=1&fields=title,cover_i`);
+      console.log(response.data)
+      const docs = response.data.docs;
+
+      let coverUrl = null;
+      if (docs.length > 0 && docs[0].cover_i) {
+        coverUrl = `https://covers.openlibrary.org/b/id/${docs[0].cover_i}-M.jpg`;
+        return coverUrl;
+      } else {
+        return null;
+      }
+    } catch (err) {
+      console.error('Error fetching cover image:', err);
+      return null;
+    }
+  }
+
   async function storeBook(e) {
     const files = e.target.files;
     if (!files.length) return;
@@ -49,6 +79,12 @@ function LibraryPage() {
         const writable = await fileHandle.createWritable();
         await writable.write(file);
         await writable.close();
+        
+        // Get filename without extension for image search
+        const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+        
+        // Try to fetch cover image
+        
         const entry = {
           name: null,
           filename: file.name,
@@ -56,11 +92,13 @@ function LibraryPage() {
           totalPages: undefined,
           filePath: `books/${file.name}`,
           progress: 0,
-          epubcfi: null
+          epubcfi: null,
+          cover: null // Add cover URL to the entry
         };
         await db.put('Books', entry);
       }
-      setModalState(prev => ({ open: true, message: "The book has been added successfully", title: "success" }))
+      setModalState(prev => ({ open: true, message: `The ${files.length > 1 ? 'books' : 'book'} has been added successfully`, title: "success" }))
+      
       await listAllBooks(); // Refresh the book list
     } catch (err) {
       console.error('Error storing book:', err);
@@ -82,6 +120,7 @@ function LibraryPage() {
       setBookToRead({ file, type: fileType, id: book.id, lastPage: book.page});
       setLocation(book.epubcfi || 0);
       setPageNumber(book.page)
+      setNavIsOpen(false)
       if (fileType === 'pdf') {
         const fileUrl = URL.createObjectURL(file);
         console.log(fileUrl)
@@ -116,6 +155,7 @@ function LibraryPage() {
       alert(err)
     }
   }
+
   async function listAllBooks() {
     try {
       const db = await openDB('App', 1, {
@@ -131,6 +171,7 @@ function LibraryPage() {
       console.error('Error listing books:', err);
     }
   }
+
   async function closeBook() {
     const db = await openDB('App', 1)
     const book = await db.get('Books', bookToRead.id)
@@ -160,6 +201,7 @@ function LibraryPage() {
         book.totalPages = numPages || pdf.numPages
         book.page = pageNumber
         book.progress = (pageNumber / (book.totalPages || 1)) * 100
+        
       } catch (err) {
         console.error('Error reading PDF metadata:', err)
         // Fallback: save what we have
@@ -176,13 +218,17 @@ function LibraryPage() {
     await db.put("Books", book)
     setBookToRead(null);
     setUrl("");
+    setNavIsOpen(true)
+  }
+
+  async function syncBook() {
+    // Implementation for syncBook function
   }
 
   return bookToRead ? (
-    <section style={{ height: '100vh' }}>
-      <button className="absolute z-50 right-[2rem] bg-red-500 rounded-md px-2 py-1 text-white" onClick={() => {
+    <section className='h-[100vh] relative'>
+      <button className="absolute z-50 right-[2rem] top-[2.5rem] bg-red-500 rounded-md px-2 py-1 text-white" onClick={() => {
         closeBook()
-
       }}>Back to Library</button>
       {bookToRead.type === 'epub' ? (
         <>
@@ -200,8 +246,8 @@ function LibraryPage() {
             }}
             getRendition={(rendition) => handleRendition(rendition)}
             epubOptions={{
-              allowScriptedContent: true, // Enable scripts in the EPUB iframe
-              allowPopups: true, // Optional: allow popups if needed
+              allowScriptedContent: true,
+              allowPopups: true,
               openAs: 'epub'
             }}
           />
@@ -244,11 +290,17 @@ function LibraryPage() {
         onChange={storeBook}
         multiple
       />
-      <div>
+      <div className='md:grid md:grid-cols-4'>
         {books.length > 0 ? (
           books.map((book) => (
             <div className="px-2 py-1 w-[300px] mt-2 shadow-lg" key={book.id}>
-              <div>Placeholder Img</div>
+              {book.cover ? (
+                <img src={book.cover} alt={`Cover of ${book.name || book.filename}`} className="w-full h-48 object-cover" />
+              ) : (
+                <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                  <span>No Cover</span>
+                </div>
+              )}
               <p>{book.name || book.filename}</p>
               <button className="btn-primary" onClick={() => getBook(book.id)}>Read Book</button>
               <button className="btn-red ml-3" onClick={() => deleteBook(book.id)}>Delete Book</button>

@@ -33,7 +33,7 @@ export default function PDFViewerApp({ pdfFilePath,setPageNumber,pageNumber,setN
   const pdfslick = usePDFSlickStore(s => s.pdfSlick)
   useEffect(() => {
     if (isDocumentLoaded) {
-      setIsThumbsbarOpen(true);
+      setIsThumbsbarOpen(false);
       setNumPages(totalPages)
       console.log(pageNumber)
       if(pageNumber && pdfslick)pdfslick.gotoPage(pageNumber)

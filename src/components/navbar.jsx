@@ -3,12 +3,13 @@ import {useEffect, useState} from 'react'
 import axios from 'axios'
 import useAuthStore from '../stores/auth_store'
 import { Bars3Icon as Bars } from '@heroicons/react/24/solid'
-
+import useNavStore from '../stores/nav_state_store';
 function Navigation_Bar() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate();
   const location = useLocation();
   const setUser = useAuthStore((state) => state.setUser)
+  const navIsOpen = useNavStore(state => state.isOpen)
   const api = import.meta.env.VITE_API
   useEffect(() => {
     fetchSession();
@@ -53,7 +54,7 @@ async  function fetchSession(){
   }
   
   return (
- (location.pathname !== '/signin' && location.pathname !== '/signup') && <div className="relative shadow-md flex justify-between items-center py-4 pl-4 ">
+ ((location.pathname !== '/signin' && location.pathname !== '/signup') && navIsOpen) && <div className="relative shadow-md flex justify-between items-center py-4 pl-4 ">
       <h2 className="text-lg"><Link to='/'>P'S BOOKS</Link></h2>
       <nav className="hidden md:block">
         <ul className="flex md:justify-center md:items-center">
