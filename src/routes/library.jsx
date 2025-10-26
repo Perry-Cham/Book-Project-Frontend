@@ -4,6 +4,7 @@ import { ReactReader } from 'react-reader';
 import { Dialog } from '@headlessui/react'
 import PdfReader from '../components/PDFreader/index.jsx'
 import useNavStore from '../stores/nav_state_store.js';
+import useAuthStore from '../stores/auth_store.js';
 import axios, { all } from 'axios'
 
 function LibraryPage() {
@@ -16,8 +17,9 @@ function LibraryPage() {
   const renditionRef = useRef(location)
   const [url, setUrl] = useState("")
   const [modalState, setModalState] = useState({ open: false, message: "", title: "" })
-  const navIsOpen = useNavStore(state => state.isOpen)
   const setNavIsOpen = useNavStore(state => state.setIsOpen)
+  const user = useAuthStore(state => state.user)
+  const api = import.meta.env.VITE_API
 
   useEffect(() => {
     listAllBooks();
@@ -79,12 +81,12 @@ function LibraryPage() {
         const writable = await fileHandle.createWritable();
         await writable.write(file);
         await writable.close();
-        
+
         // Get filename without extension for image search
         const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
-        
+
         // Try to fetch cover image
-        
+
         const entry = {
           name: null,
           filename: file.name,
@@ -93,12 +95,13 @@ function LibraryPage() {
           filePath: `books/${file.name}`,
           progress: 0,
           epubcfi: null,
-          cover: null // Add cover URL to the entry
+          cover: null, // Add cover URL to the entry
+          synced: false
         };
         await db.put('Books', entry);
       }
       setModalState(prev => ({ open: true, message: `The ${files.length > 1 ? 'books' : 'book'} has been added successfully`, title: "success" }))
-      
+
       await listAllBooks(); // Refresh the book list
     } catch (err) {
       console.error('Error storing book:', err);
@@ -111,13 +114,12 @@ function LibraryPage() {
       const db = await openDB('App', 1);
       const book = await db.get('Books', id);
       if (!book) throw new Error('Book not found');
-
       const root = await navigator.storage.getDirectory();
       const booksDir = await root.getDirectoryHandle('books', { create: false });
       const fileHandle = await booksDir.getFileHandle(book.filename);
       const file = await fileHandle.getFile();
       const fileType = book.filename.split('.').pop().toLowerCase();
-      setBookToRead({ file, type: fileType, id: book.id, lastPage: book.page});
+      setBookToRead({ file, type: fileType, id: book.id, lastPage: book.page });
       setLocation(book.epubcfi || 0);
       setPageNumber(book.page)
       setNavIsOpen(false)
@@ -201,7 +203,7 @@ function LibraryPage() {
         book.totalPages = numPages || pdf.numPages
         book.page = pageNumber
         book.progress = (pageNumber / (book.totalPages || 1)) * 100
-        
+
       } catch (err) {
         console.error('Error reading PDF metadata:', err)
         // Fallback: save what we have
@@ -221,8 +223,53 @@ function LibraryPage() {
     setNavIsOpen(true)
   }
 
-  async function syncBook() {
-    // Implementation for syncBook function
+  async function syncBooks(id) {
+    try {
+      const db = await openDB('App', 1)
+      const books = await db.getAll('Books')
+      const syncedBooks = books.filter(book => book.synced)
+      
+      const formData = new FormData()
+      
+      // Add each file to formData
+      for (const book of syncedBooks) {
+        const root = await navigator.storage.getDirectory()
+        const booksDir = await root.getDirectoryHandle('books', { create: false })
+        const fileHandle = await booksDir.getFileHandle(book.filename, { create: false })
+        const file = await fileHandle.getFile()
+        formData.append('books[]', file, book.filename)
+      }
+      
+      // Add book metadata as JSON string
+      formData.append('books', JSON.stringify(syncedBooks))
+
+      const response = await axios.patch(`${api}/syncbooks`, formData, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      
+      if (response.status === 200) {
+        console.log('Books synced successfully:', response)
+      }
+    } catch (error) {
+      console.error('Error syncing books:', error)
+    }
+
+
+  }
+
+  async function syncPages() {
+    const db = await openDB('App', 1)
+    const book = await db.get('Books', bookToRead.id)
+    const data = { name: book.name, progress: book.progress }
+    bookToRead.type === "epub" ? data.location = location : data.page = bookToRead.lastPage;
+    try {
+      await axios.patch(`${api}/syncpages`, data, { withCredentials: true })
+    } catch (error) {
+      console.error('Error syncing pages:', error)
+    }
   }
 
   return bookToRead ? (
@@ -238,7 +285,7 @@ function LibraryPage() {
             tocChanged={(_toc) => (tocRef.current = _toc)}
             locationChanged={(loc) => {
               setLocation(loc)
-              if(!(/\.xhtml$/i.test(loc))) {
+              if (!(/\.xhtml$/i.test(loc))) {
                 console.log(loc)
                 const currentLocation = renditionRef.current?.book.locations?.percentageFromCfi(loc);
                 console.log("Current location percentage:", currentLocation);
@@ -262,7 +309,8 @@ function LibraryPage() {
     </section>
   ) : (
     <section>
-      <p>Hello User</p>
+      <p>Hello {user.name},</p>
+      <button onClick={() => syncBooks()}>Toggle Syncing</button>
       <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -290,10 +338,10 @@ function LibraryPage() {
         onChange={storeBook}
         multiple
       />
-      <div className='md:grid md:grid-cols-4'>
+      <div className='md:grid md:grid-cols-4 md:gap-2'>
         {books.length > 0 ? (
           books.map((book) => (
-            <div className="px-2 py-1 w-[300px] mt-2 shadow-lg" key={book.id}>
+            <div className="px-2 py-1 md:w-[300px] w-[230px] mt-2 shadow-lg" key={book.id}>
               {book.cover ? (
                 <img src={book.cover} alt={`Cover of ${book.name || book.filename}`} className="w-full h-48 object-cover" />
               ) : (
@@ -301,9 +349,16 @@ function LibraryPage() {
                   <span>No Cover</span>
                 </div>
               )}
-              <p>{book.name || book.filename}</p>
-              <button className="btn-primary" onClick={() => getBook(book.id)}>Read Book</button>
-              <button className="btn-red ml-3" onClick={() => deleteBook(book.id)}>Delete Book</button>
+              <div className="grid grid-row-2 h-[100px] gap-1">
+                <p className="line-clamp-2">{book.name || book.filename}</p>
+                <div>
+                  <button className="btn-primary" onClick={() => getBook(book.id)}>Read Book</button>
+                  <button className="btn-red ml-3" onClick={() => deleteBook(book.id)}>Delete Book</button>
+                </div>
+              </div>
+
+
+
             </div>
           ))
         ) : (
