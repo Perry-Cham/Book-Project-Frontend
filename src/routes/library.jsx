@@ -228,9 +228,9 @@ function LibraryPage() {
       const db = await openDB('App', 1)
       const books = await db.getAll('Books')
       const syncedBooks = books.filter(book => book.synced)
-      
+
       const formData = new FormData()
-      
+
       // Add each file to formData
       for (const book of syncedBooks) {
         const root = await navigator.storage.getDirectory()
@@ -239,7 +239,7 @@ function LibraryPage() {
         const file = await fileHandle.getFile()
         formData.append('books[]', file, book.filename)
       }
-      
+
       // Add book metadata as JSON string
       formData.append('books', JSON.stringify(syncedBooks))
 
@@ -249,7 +249,7 @@ function LibraryPage() {
           'Content-Type': 'multipart/form-data'
         }
       })
-      
+
       if (response.status === 200) {
         console.log('Books synced successfully:', response)
       }
@@ -308,9 +308,8 @@ function LibraryPage() {
       )}
     </section>
   ) : (
-    <section>
+    <section className="px-2">
       <p>Hello {user.name},</p>
-      <button onClick={() => syncBooks()}>Toggle Syncing</button>
       <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -332,12 +331,20 @@ function LibraryPage() {
           </Dialog.Panel>
         </div>
       </Dialog>
-      <input
-        type="file"
-        accept=".pdf,.epub"
-        onChange={storeBook}
-        multiple
-      />
+      <div className='flex justify-between align-center'>
+        <label for="files">Add Books <br />
+          <input
+            type="file"
+            name="files"
+            accept=".pdf,.epub"
+            onChange={storeBook}
+            multiple
+          />
+        </label>
+
+        <button className="btn-primary max-h-[2.25rem]" onClick={() => syncBooks()}>Toggle Syncing</button>
+      </div>
+
       <div className='md:grid md:grid-cols-4 md:gap-2'>
         {books.length > 0 ? (
           books.map((book) => (

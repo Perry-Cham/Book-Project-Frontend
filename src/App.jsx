@@ -8,6 +8,7 @@ import Goal_Page from './routes/goal'
 import Study_Page from './routes/study'
 import Download_Page from './routes/download'
 import Library_Page from './routes/library'
+import Profile_Page from './routes/profile'
 import Auth from './routes/auth'
 import Home from './routes/home'
 import './css/styles.css'
@@ -26,7 +27,7 @@ function App() {
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <Layout />,  // Use the layout for all routes that need navbar
+      element: <Layout />,
       children: [
         {
           path: '/',
@@ -51,6 +52,10 @@ function App() {
         {
           path: '/home',
           element: <Home />
+        },
+        {
+          path: '/profile',
+          element: <Profile_Page />
         }
       ]
     },

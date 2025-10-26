@@ -54,7 +54,7 @@ async  function fetchSession(){
   }
   
   return (
- ((location.pathname !== '/signin' && location.pathname !== '/signup') && navIsOpen) && <div className="relative shadow-md flex justify-between items-center py-4 pl-4 ">
+ navIsOpen && <div className="relative shadow-md flex justify-between items-center py-4 pl-4 ">
       <h2 className="text-lg"><Link to='/'>P'S BOOKS</Link></h2>
       <nav className="hidden md:block">
         <ul className="flex md:justify-center md:items-center">
@@ -62,7 +62,8 @@ async  function fetchSession(){
           <li className="px-4"><Link to="/goal">Goals</Link></li>
           <li className="px-4"><Link to="/study">Study</Link></li>
           <li className="px-4"><Link to="/library">Library</Link></li>
-          <li className="px-4" onClick={handleLogout}>Logout</li>
+          <li className="px-4"><Link to="/profile">Profile</Link></li>
+          <li className="px-4 cursor-pointer" onClick={handleLogout}>Logout</li>
         </ul>
       </nav> 
 
@@ -72,6 +73,7 @@ async  function fetchSession(){
           <li className={`px-4 py-3  ${location.pathname == '/goal' ? 'active-link' : ""}`}><Link to="/goal">Goals</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/study' ? 'active-link' : ""}`}><Link to="/study">Study</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/study' ? 'active-link' : ""}`}><Link to="/library">Library</Link></li>
+          <li className={`px-4 py-3  ${location.pathname == '/study' ? 'active-link' : ""}`}><Link to="/profile">Profile</Link></li>
           <li className="px-4 py-3" onClick={handleLogout}>Logout</li>
         </ul>
       </nav>
