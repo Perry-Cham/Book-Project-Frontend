@@ -9,9 +9,10 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
+import api from '../../utilities/api'
 
 function Book_Section({ props, bookProps }) {
-  const { openModal, api, modalState, setModalState } = props;
+  const { openModal, modalState, setModalState } = props;
   const { sbooks, setSbooks, cbooks, setCbooks } = bookProps;
   const [currBook, setCurrBook] = useState({});
 
@@ -47,9 +48,7 @@ function Book_Section({ props, bookProps }) {
   async function handleRead(data, type) {
     const endpoint = type == "setMax" ? "setcurrentbook" : "setcurrentpage";
     try {
-      const response = await axios.post(`${api}/${endpoint}`, data, {
-        withCredentials: true
-      });
+      const response = await api.post(`/${endpoint}`, data);
       if (response.status == 200) {
         if (type === "setMax") {
           alert(`Congratulations you've just started ${data.title}`);
@@ -68,9 +67,7 @@ function Book_Section({ props, bookProps }) {
 
   async function getCurrentBooks() {
     try {
-      const response = await axios.get(`${api}/getcurrentbooks`, {
-        withCredentials: true
-      });
+      const response = await api.get(`/getcurrentbooks`);
       if (response.status == 200) {
         response.data.currentBooks.length > 0 ? setCbooks(response.data.currentBooks) : setCbooks(undefined);
       } else {
@@ -84,7 +81,7 @@ function Book_Section({ props, bookProps }) {
 
   async function getSavedBooks() {
     try {
-      const response = await axios.get(`${api}/getsavedbooks`, { withCredentials: true });
+      const response = await api.get(`/getsavedbooks`, { withCredentials: true });
       if (response.status == 200) {
         response.data.length !== 0 ? setSbooks(response.data) : setSbooks(undefined);
       } else {

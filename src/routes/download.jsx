@@ -1,14 +1,14 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import api from '../utilities/api'
 function Download_Page() {
   const { id } = useParams();
   const [book, setBook] = useState()
-  const api = import.meta.env.VITE_API
   useEffect(() => {
     async function fetchData() {
       try {
-        const response= await axios.get(`${api}/download/${id}`, {withCredentials:true})
+        const response= await api.get(`/download/${id}`)
         setBook(response.data)
 
       } catch (err) {
@@ -19,7 +19,7 @@ function Download_Page() {
   }, [])
 async  function handleSave(id){
     try {
-      const response = await axios.post(`${api}/saveBook/${id}`,{}, {withCredentials:true})
+      const response = await api.post(`/saveBook/${id}`,{})
       if(response.status == 200){
         console.log(response)
         alert('Your book has been saved to your profile')}else alert('The operation could not be completed')

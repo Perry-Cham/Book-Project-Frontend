@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import Modal from "../../components/modal"
-import axios from "axios";
+import api from '../../utilities/api'
 
 function Goal_Section({ props, bookProps }) {
-  const { openModal, api, modalState, setModalState } = props;
+  const { openModal, modalState, setModalState } = props;
   const { cbooks } = bookProps;
   const [goal, setGoal] = useState();
 
@@ -16,9 +16,7 @@ function Goal_Section({ props, bookProps }) {
 
   async function getGoal() {
     try {
-      const response = await axios.get(`${api}/getgoal`, {
-        withCredentials: true
-      });
+      const response = await api.get(`/getgoal`);
       if (response.status == 200) {
         const goal = response.data;
 
@@ -43,7 +41,7 @@ function Goal_Section({ props, bookProps }) {
   async function handleGoal(data) {
     try {
       console.log(data)
-      const response = await axios.post(`${api}/setgoal`, data, {
+      const response = await api.post(`/setgoal`, data, {
         withCredentials: true
       })
       if (response.status == 200) {
@@ -60,7 +58,7 @@ function Goal_Section({ props, bookProps }) {
 
   async function handleDelete(id) {
     try {
-      const response = await axios.delete(`${api}/deletegoal/${id}`, { withCredentials: true })
+      const response = await api.delete(`/deletegoal/${id}`);
       if (response.status === 200) { alert('goal has been deleted') }
       getGoal()
     } catch (err) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {format} from 'date-fns'
+import { format } from 'date-fns'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,8 +10,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line} from 'react-chartjs-2';
-import axios from 'axios'
+import { Line } from 'react-chartjs-2';
+import api from '../../utilities/api'
 
 // Register ChartJS components
 ChartJS.register(
@@ -27,28 +27,26 @@ ChartJS.register(
 function History_Section({ cbooks }) {
   const [history, setHistory] = useState(null);
   const [chartData, setChartData] = useState(null)
-  const api = import.meta.env.VITE_API
+
 
   useEffect(() => {
     getData()
     if (history) {
       processReadingData();
     }
-       async function getData(){
-         try{
-           const response = await axios.get(`${api}/gethistory`,{
-          withCredentials:true
-        })
+    async function getData() {
+      try {
+        const response = await api.get(`/gethistory`)
         setHistory(response.data)
-         }catch(err){
-           console.error(err)
-         }
-        
+      } catch (err) {
+        console.error(err)
       }
-      
-  },[]);
 
-console.log(api)
+    }
+
+  }, []);
+
+  console.log(api)
 
   const processReadingData = () => {
     // Get current week (Sunday to Saturday)
@@ -58,26 +56,26 @@ console.log(api)
     const lastDayOfWeek = new Date(firstDayOfWeek);
     lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6); // Saturday
 
-const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     // Initialize data array with zeros
     const pagesRead = new Array(7).fill(0);
     //Create chart data
-    for(const entry of history){
+    for (const entry of history) {
       const entryDate = new Date(entry.date)
       const entryDay = String(format(entryDate, 'eee')).toLowerCase()
-    for(const Day of labels){
-      if(Day.toLowerCase() == entryDay){
-       const i = labels.indexOf(Day)
-       pagesRead[i] = entry.numberOfPages;
+      for (const Day of labels) {
+        if (Day.toLowerCase() == entryDay) {
+          const i = labels.indexOf(Day)
+          pagesRead[i] = entry.numberOfPages;
+        }
       }
     }
-    }
-    
 
-console.log(pagesRead)
+
+    console.log(pagesRead)
     // Prepare chart data
     const data = {
-      labels:labels,
+      labels: labels,
       datasets: [
         {
           label: 'Pages Read',
@@ -93,7 +91,7 @@ console.log(pagesRead)
   };
 
   const options = {
-    maintainAspectRatio:false,
+    maintainAspectRatio: false,
     responsive: true,
     plugins: {
       legend: {
@@ -120,13 +118,13 @@ console.log(pagesRead)
       },
     },
   };
-  
+
   return (
     <section className="py-4 px-2 my-2 mx-1 bg-white rounded-sm">
       <h2 className="font-medium text-lg">Reading History</h2>
       {chartData ? (
         <div className="h-[45vh]">
-          <Line  options={options} data={chartData} />
+          <Line options={options} data={chartData} />
         </div>
       ) : (
         <div>
