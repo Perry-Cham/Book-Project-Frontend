@@ -12,7 +12,31 @@ import Profile_Page from './routes/profile'
 import Auth from './routes/auth'
 import Home from './routes/home'
 import './css/styles.css'
+import api from './utilities/api'
+const ProtectedRoute = () => {
+  const [auth, isAuth] = useState(false);
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await api.get(`/getsession`)
+        if (response.status === 200) {
+          isAuth(true);
+        }
+      } catch (error) {
+        console.error(error);
+        Navigate('/')
+      }
+    };
+    checkAuth();
+  }, []);
 
+  return (
+    !auth ? <>
+      <Navigation_Bar />
+      <Outlet />  {/* This will render the current route's element */}
+    </> : <Navigate to="/" />
+  )
+}
 const Layout = () => {
   return (
     <>
@@ -32,7 +56,13 @@ function App() {
         {
           path: '/',
           element: <LandingPage />
-        },
+        }
+      ]
+    },
+    {
+      path: '/',
+      element: <ProtectedRoute />,
+      children: [
         {
           path: '/goal',
           element: <Goal_Page />

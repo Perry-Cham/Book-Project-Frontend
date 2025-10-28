@@ -15,11 +15,10 @@ async function handleSubmit(e) {
       password: form.get("password")
     }
     try{
-      const response = await axios.post(e.target.getAttribute('action'), data, {
-        withCredentials:true
-      })
+      const response = await axios.post(e.target.getAttribute('action'), data)
       if (response.status == 200) {
         setUser(response.data)
+        localStorage.setItem('token', response.data.token)
         navigate('/home')
       } else {
         alert('Login Failed')

@@ -11,46 +11,15 @@ function Navigation_Bar() {
   const setUser = useAuthStore((state) => state.setUser)
   const navIsOpen = useNavStore(state => state.isOpen)
   const api = import.meta.env.VITE_API
-  useEffect(() => {
-    fetchSession();
-  }, [])
-async  function fetchSession(){
-    try{
-  const userSession = await axios.get(`${api}/getsession`, {
-    withCredentials:true
-  });
   
-  if(userSession.status == 200){
-    const user2 = {
-      name:userSession.data.name,
-      loggedIn:true
-    }
-    const link = location.pathname == "/" ? "/home" : location.pathname
-    setUser(user2)
-    navigate(link)
-  }}catch(err){
-    console.error(err)
-    navigate('/')
-  }}
   
   function handleNav() {
     const nav = document.querySelector('.mobile-nav')
     nav.classList.contains ? nav.classList.toggle('scale-100') : "";
   }
   async function handleLogout() {
-    try {
-      const response = await axios.get(`${api}/logout`, {
-        withCredentials:true
-      })
-      if (response.status == 200){ 
-        navigate('/')
-        console.log(response)
-        setOpen(false)
-      } else alert('logout failed')
-    } catch (err) {
-      console.error(err)
-      alert('failed')
-    }
+   localStorage.removeItem('token')
+   navigate('/')
   }
   
   return (
