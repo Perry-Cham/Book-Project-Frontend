@@ -2,10 +2,11 @@ import { openDB } from 'idb';
 import { useState, useEffect, useRef } from 'react';
 import { ReactReader } from 'react-reader';
 import { Dialog } from '@headlessui/react'
-import PdfReader from '../components/PDFreader/index.jsx'
-import useNavStore from '../stores/nav_state_store.js';
-import useAuthStore from '../stores/auth_store.js';
-import axios, { all } from 'axios'
+import PdfReader from '../components/PDFreader/index'
+import useNavStore from '../stores/nav_state_store';
+import useAuthStore from '../stores/auth_store';
+import axios from 'axios'
+import api from '../utilities/api'
 
 function LibraryPage() {
   const [bookToRead, setBookToRead] = useState(null);
@@ -19,7 +20,6 @@ function LibraryPage() {
   const [modalState, setModalState] = useState({ open: false, message: "", title: "" })
   const setNavIsOpen = useNavStore(state => state.setIsOpen)
   const user = useAuthStore(state => state.user)
-  const api = import.meta.env.VITE_API
 
   useEffect(() => {
     listAllBooks();
@@ -84,8 +84,7 @@ function LibraryPage() {
 
         // Get filename without extension for image search
         const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
-
-        // Try to fetch cover image
+        const fileType = file.name.split('.').pop().toLowerCase();
 
         const entry = {
           name: null,
@@ -95,8 +94,9 @@ function LibraryPage() {
           filePath: `books/${file.name}`,
           progress: 0,
           epubcfi: null,
-          cover: null, // Add cover URL to the entry
-          synced: false
+          cover: '', // Add cover URL to the entry
+          synced: false,
+          fileType: fileType
         };
         await db.put('Books', entry);
       }
@@ -209,10 +209,10 @@ function LibraryPage() {
         // Fallback: save what we have
         book.totalPages = numPages
         book.page = pageNumber
-        book.progress = (pageNumber / (numPages || 1)) * 100
+        book.progress = Math.floor((pageNumber / (numPages || 1)) * 100)
       }
     } else {
-      book.progress = renditionRef.current?.book.locations?.percentageFromCfi(location) * 100;
+      book.progress = Math.floor(renditionRef.current?.book.locations?.percentageFromCfi(location) * 100);
       book.epubcfi = location;
       book.name = renditionRef.current?.book?.packaging.metadata?.title
     }
@@ -227,23 +227,21 @@ function LibraryPage() {
     try {
       const db = await openDB('App', 1)
       const books = await db.getAll('Books')
-      const syncedBooks = books.filter(book => book.synced)
 
       const formData = new FormData()
-
       // Add each file to formData
-      for (const book of syncedBooks) {
+      for (const book of books) {
         const root = await navigator.storage.getDirectory()
         const booksDir = await root.getDirectoryHandle('books', { create: false })
         const fileHandle = await booksDir.getFileHandle(book.filename, { create: false })
         const file = await fileHandle.getFile()
-        formData.append('books[]', file, book.filename)
+        formData.append('books', file, book.filename)
       }
 
       // Add book metadata as JSON string
-      formData.append('books', JSON.stringify(syncedBooks))
+      formData.append('books', JSON.stringify(books))
 
-      const response = await axios.patch(`${api}/syncbooks`, formData, {
+      const response = await api.patch(`/syncbooks`, formData, {
         withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -345,10 +343,10 @@ function LibraryPage() {
         <button className="btn-primary max-h-[2.25rem]" onClick={() => syncBooks()}>Toggle Syncing</button>
       </div>
 
-      <div className='md:grid md:grid-cols-4 md:gap-2'>
+      <div className='grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 md:gap-2 lg:gap-4'>
         {books.length > 0 ? (
           books.map((book) => (
-            <div className="px-2 py-1 md:w-[300px] w-[230px] mt-2 shadow-lg" key={book.id}>
+            <div className="px-2 py-1 mt-2 shadow-lg w-[250px] md:w-[auto]" key={book.id}>
               {book.cover ? (
                 <img src={book.cover} alt={`Cover of ${book.name || book.filename}`} className="w-full h-48 object-cover" />
               ) : (

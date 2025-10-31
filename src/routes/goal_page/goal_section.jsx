@@ -19,15 +19,7 @@ function Goal_Section({ props, bookProps }) {
       const response = await api.get(`/getgoal`);
       if (response.status == 200) {
         const goal = response.data;
-
-        if (!goal.goal.complete) {
-          const currPages = goal.currentBooks.reduce((a, b) => a + b.page, 0)
-          const tpage = goal.currentBooks.reduce((a, b) => a + b.pageCount, 0)
-          goal.pagesRead = currPages;
-          goal.totalPages = tpage;
-          goal.pageView = true;
-          setGoal(response.data)
-        } else {
+        if (goal.goal.complete) {
           alert("Congratulations, you've just completed your reading goal! Cheers to you!")
           setGoal(undefined)
         }
@@ -73,22 +65,11 @@ function Goal_Section({ props, bookProps }) {
       {goal ?
         <div>
           <p>Books to read: {goal.goal.numberOfBooks}</p>
-          {goal.pageView ?
-            <div>
-              <input type="range" value={goal.pagesRead} max={goal.totalPages} />
-              <p>{goal.pagesRead || 0} / {goal.totalPages || 0}</p>
-              <p>{Math.ceil((goal.pagesRead / goal.totalPages) * 100) || 0}% complete {goal.pageView ? `of ${goal.currentBooks.length} book(s)` : ""}</p>
-            </div>
-            :
             <div>
               <input type="range" value={goal.goal.booksRead.length} max={goal.goal.numberOfBooks} />
               <p>{goal.goal.booksRead.length} / {goal.goal.numberOfBooks}</p>
               <p>{(goal.goal.booksRead.length / goal.goal.numberOfBooks) * 100}% complete </p>
             </div>
-          }
-
-          <button className="btn-primary" onClick={() => { goal.pageView ? setGoal({ ...goal, pageView: false }) : setGoal({ ...goal, pageView: true }) }}>
-            {goal.pageView ? "Switch To Book View" : "Switch To Page View"}</button>
 
           <p>
             Ending On: {

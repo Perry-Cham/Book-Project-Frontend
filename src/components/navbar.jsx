@@ -1,6 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import {useEffect, useState} from 'react'
-import axios from 'axios'
+import {useState} from 'react'
 import useAuthStore from '../stores/auth_store'
 import { Bars3Icon as Bars } from '@heroicons/react/24/solid'
 import useNavStore from '../stores/nav_state_store';
@@ -41,8 +40,8 @@ function Navigation_Bar() {
           <li className={`px-4 py-3  ${(location.pathname == '/home' || location.pathname.startsWith('/download')) ? 'active-link' : ""}`}><Link to="/home">Home</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/goal' ? 'active-link' : ""}`}><Link to="/goal">Goals</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/study' ? 'active-link' : ""}`}><Link to="/study">Study</Link></li>
-          <li className={`px-4 py-3  ${location.pathname == '/study' ? 'active-link' : ""}`}><Link to="/library">Library</Link></li>
-          <li className={`px-4 py-3  ${location.pathname == '/study' ? 'active-link' : ""}`}><Link to="/profile">Profile</Link></li>
+          <li className={`px-4 py-3  ${location.pathname == '/library' ? 'active-link' : ""}`}><Link to="/library">Library</Link></li>
+          <li className={`px-4 py-3  ${location.pathname == '/profile' ? 'active-link' : ""}`}><Link to="/profile">Profile</Link></li>
           <li className="px-4 py-3" onClick={handleLogout}>Logout</li>
         </ul>
       </nav>
