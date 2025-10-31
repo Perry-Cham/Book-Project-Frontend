@@ -23,7 +23,7 @@ function Navigation_Bar() {
   }
   
   return (
- navIsOpen && <div className="relative shadow-md flex justify-between items-center py-4 pl-4 ">
+ navIsOpen && <header className="relative shadow-md flex justify-between items-center py-4 pl-4 ">
       <h2 className="text-lg"><Link to='/'>P'S BOOKS</Link></h2>
       <nav className="hidden md:block">
         <ul className="flex md:justify-center md:items-center">
@@ -36,7 +36,7 @@ function Navigation_Bar() {
         </ul>
       </nav> 
 
-      <nav className={`mobile-nav absolute text-white w-[100vw]  bottom-[-230px] right-0  md:hidden flex justify-center items-center scale-0 transition-transform origin-top-right duration-300  z-50 ${open && "scale-100"}`}>
+      <nav className={`mobile-nav absolute text-white w-[100vw]  bottom-[-350px] right-0  md:hidden flex justify-center items-center scale-0 transition-transform origin-top-right duration-300  z-50 ${open && "scale-100"}`}>
         <ul className="flex md:justify-center md:items-center flex-col gap-1 rounded-md p-2 bg-blue-800 w-[98%]">
           <li className={`px-4 py-3  ${(location.pathname == '/home' || location.pathname.startsWith('/download')) ? 'active-link' : ""}`}><Link to="/home">Home</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/goal' ? 'active-link' : ""}`}><Link to="/goal">Goals</Link></li>
@@ -48,7 +48,7 @@ function Navigation_Bar() {
       </nav>
 
       <Bars className="size-7 md:hidden" onClick={() => setOpen(!open)} />
-    </div>
+    </header>
 
   )
 }

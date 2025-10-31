@@ -2,19 +2,18 @@ import Study_Modal from './study_modal'
 import { Dialog, Tab } from '@headlessui/react'
 import { useState, useEffect } from 'react'
 import useAuthStore from '../../stores/auth_store'
-import axios from 'axios'
+import api from '../../utilities/api'
 function Topics() {
   const [goalData, setGoalData] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [modalState, setModalState] = useState({ heading: "", message: "", open: false })
-  const api = import.meta.env.VITE_API
   const {user} = useAuthStore();
   useEffect(() => {
     getTopics();
   }, [])
   async function getTopics() {
     try {
-      const response = await axios.get(`${api}/getstudygoal`, {
+      const response = await api.get(`/getstudygoal`, {
         withCredentials: true
       })
       console.log(response)
@@ -33,9 +32,9 @@ function Topics() {
       completed: false
     }))
     try {
-      const response = await axios.post(`${api}/setstudygoal`, tData, { withCredentials: true })
+      const response = await api.post(`/setstudygoal`, tData, { withCredentials: true })
       if (response.status === 200) {
-        setModalState((prev) => ({ ...prev, open: true, heading: "Congratulations", message: "The timetable has been successfully sent to the server " }))
+        setModalState((prev) => ({ ...prev, open: true, heading: "Congratulations", message: "The operation completed successfully" }))
         getTopics() // Refresh the timetable
       }
     } catch (err) {
@@ -45,9 +44,9 @@ function Topics() {
   }
   async function handleDelete(subject) {
     try {
-      const response = await axios.patch(`${api}/deletestudygoal`, { subject: subject }, { withCredentials: true })
+      const response = await api.patch(`/deletestudygoal`, { subject: subject }, { withCredentials: true })
       if (response.status == 200) {
-        setModalState((prev) => ({ ...prev, open: true, heading: "Congratulations", message: "The timetable has been successfully sent to the server " }))
+        setModalState((prev) => ({ ...prev, open: true, heading: "Congratulations", message: "The operation completed successfully" }))
         getTopics()
       }
     } catch (err) {
@@ -109,10 +108,21 @@ function Topics() {
                 <h3 className="">Topics</h3>
                 <ul>
                   {subject.topics.map(topic => (
-                    <li onClick={() => handleTopicComplete(topic.name)}className="list-disc list-inside" key={Math.random() + Date.now()}>
-                      {topic.name}
-                      {String(topic.completed)}
-                      {console.log(topic.completed)}
+                    <li onClick={() => handleTopicComplete(topic.name)}className={`border rounded-lg ${topic.completed && 'border-blue-800 border-2'}`} key={Math.random() + Date.now()}>
+                      <p>{topic.name}</p>
+                    {!topic.completed && <button classname="btn-primary" onClick={async () => {
+                        const copy = [...goalData]
+                        const parent = copy.find(el => el.subject === subject.subject)
+                        const index = parent.topics.indexOf(topic)
+                        parent.topics[index].completed = true;
+                        setGoalData(copy)
+                        try {
+                          const response = await api.patch('/completegoal', {subject:subject.subject, topics:subject.topics})
+                          console.log(response)
+                        } catch (error) {
+                          console.error(error)
+                        }
+                      }}>Mark as completed</button>} 
                     </li>))}
                 </ul>
                 <p>Deadline: {subject.endDate}</p>

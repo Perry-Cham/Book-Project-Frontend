@@ -2,8 +2,6 @@
 import { useState } from 'react'
 
 function Study_Modal({ type, handleSubmit }) {
-  const [timeTable, setTimeTable] = useState(null)
-  const [target, setTarget] = useState(null)
   const [timetableForm, setTimetableForm] = useState([])
   const [targetForm, setTargetForm] = useState({ subject: '', topics: '' })
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
@@ -80,16 +78,11 @@ function Study_Modal({ type, handleSubmit }) {
     })
   }
 
-  const transformTopics = (topicsString) => {
-    return topicsString.split(',').map(topic => topic.trim()).filter(Boolean).map(name => ({
-      name,
-      completed: false
-    }))
-  }
 
   function sendData(e,data) {
     e.preventDefault()
     handleSubmit(data)
+    setTargetForm({ subject: '', topics: '' })
   }
 
   return (

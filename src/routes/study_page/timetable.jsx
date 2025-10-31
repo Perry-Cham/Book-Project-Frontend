@@ -4,8 +4,8 @@ import Study_Modal from './study_modal'
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import useAuthStore from '../../stores/auth_store'
+import api from '../../utilities/api'
 function Timetable() {
-  const api = import.meta.env.VITE_API
   const [modalState, setModalState] = useState({ heading: "", message: "", open: false })
   const [timetable, setTimetable] = useState(null)
   const [showTableForm, setShowTableForm] = useState(false)
@@ -41,7 +41,7 @@ function Timetable() {
     let tData = { days: transformedData }
 
     try {
-      const response = await axios.post(`${api}/settimetable`, tData, { withCredentials: true })
+      const response = await api.post(`/settimetable`, tData)
       if (response.status === 200) {
         setModalState((prev) => ({ ...prev, open: true, heading: "Congratulations", message: "The timetable has been successfully sent to the server " }))
         getTimeTable()
@@ -54,7 +54,7 @@ function Timetable() {
 
   async function handleDelete() {
     try {
-      const response = await axios.patch(`${api}/deleteTimetable`, {}, { withCredentials: true })
+      const response = await api.patch(`/deleteTimetable`, {}, { withCredentials: true })
       response.status === 200 ?
         setModalState({ heading: "Success!", message: "The operation completed successfully.", open: true }) :
         setModalState({ heading: "Failure", message: "There was an error on our end, please try again later", open: true })
@@ -67,7 +67,7 @@ function Timetable() {
 
   async function getTimeTable() {
     try {
-      const response = await axios.get(`${api}/gettimetable`, { withCredentials: true })
+      const response = await api.get(`/gettimetable`)
       
       if (response.status === 200) {
         setTimetable(() => response.data[0]?.days || null)
