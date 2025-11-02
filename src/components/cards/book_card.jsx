@@ -12,8 +12,8 @@ function Book_Card({ book, type, functions }) {
       {type == "currentBook" &&
         <>
           <p>Current Page: {book.page}</p>
-          <input type="range" value={book.page} max={book.pageCount} />
-          <p>{((book.page / book.pageCount) * 100).toFixed(1)}%</p>
+          <input type="range" value={book.progress || 0.1} max={100} />
+          <p>{book.progress || 0.1}%</p>
         </>
       }
 

@@ -41,7 +41,7 @@ function Profile_Page() {
                             {modalState.heading}
                         </Dialog.Title>
                         <Dialog.Description>
-                            <p>{modalState.message}</p>
+                            {modalState.message}
                         </Dialog.Description>
                         <div className="mt-4 flex justify-end">
                             <button

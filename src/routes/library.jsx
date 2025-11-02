@@ -16,6 +16,7 @@ function LibraryPage() {
   const [location, setLocation] = useState(0)
   const tocRef = useRef(null)
   const renditionRef = useRef(location)
+  const bookRef = useRef(null)
   const [url, setUrl] = useState("")
   const [modalState, setModalState] = useState({ open: false, message: "", title: "" })
   const setNavIsOpen = useNavStore(state => state.setIsOpen)
@@ -98,11 +99,47 @@ function LibraryPage() {
           synced: false,
           fileType: fileType
         };
-        await db.put('Books', entry);
-      }
-      setModalState(prev => ({ open: true, message: `The ${files.length > 1 ? 'books' : 'book'} has been added successfully`, title: "success" }))
+        //PDF Processing
+        if (fileType === 'pdf') {
+          try {
+            // Try to use pdfjs if available on window, otherwise dynamic import
+            let pdfjsLib = window['pdfjs-dist/build/pdf']
+            if (!pdfjsLib) {
+              const imported = await import('pdfjs-dist/build/pdf')
+              // some bundlers put the lib on default, others export directly
+              pdfjsLib = imported.default || imported
+            }
+            const pdfUrl = URL.createObjectURL(file);
+            const loadingTask = pdfjsLib.getDocument(pdfUrl)
+            const pdf = await loadingTask.promise
+            const metadata = await pdf.getMetadata()
+            const titleFromInfo = metadata?.info?.Title
+            const titleFromXmp = metadata?.metadata && typeof metadata.metadata.get === 'function'
+              ? metadata.metadata.get('dc:title')
+              : null
+            const title = titleFromInfo || titleFromXmp || entry.filename
 
-      await listAllBooks(); // Refresh the book list
+            entry.name = title
+            entry.totalPages = pdf.numPages;
+            await db.put('Books', entry);
+          } catch (err) {
+            console.error('Error loading PDF:', err);
+          }
+        } else if (fileType === 'epub') {
+          const imported = await import('epubjs');
+          const epubUrl = URL.createObjectURL(file);
+          const book = new imported.Book(file)
+          book.ready.then((data) => {
+            bookRef.current = data[2]
+            entry.name = bookRef.current.title || file.name;
+            db.put('Books', entry);
+            listAllBooks();
+          })
+        }
+        
+        setModalState(prev => ({ open: true, message: `The ${files.length > 1 ? 'books' : 'book'} has been added successfully`, title: "success" }))
+        listAllBooks(); // Refresh the book list
+      }
     } catch (err) {
       console.error('Error storing book:', err);
       alert('Operation failed');
@@ -180,35 +217,10 @@ function LibraryPage() {
 
     if (bookToRead.type === 'pdf') {
       try {
-        // Try to use pdfjs if available on window, otherwise dynamic import
-        let pdfjsLib = window['pdfjs-dist/build/pdf']
-        if (!pdfjsLib) {
-          const imported = await import('pdfjs-dist/build/pdf')
-          // some bundlers put the lib on default, others export directly
-          pdfjsLib = imported.default || imported
-        }
-
-        const loadingTask = pdfjsLib.getDocument(url)
-        const pdf = await loadingTask.promise
-        const metadata = await pdf.getMetadata()
-
-        // Prefer the info Title, then XMP metadata dc:title, then filename
-        console.log(metadata)
-        const titleFromInfo = metadata?.info?.Title
-        const titleFromXmp = metadata?.metadata && typeof metadata.metadata.get === 'function'
-          ? metadata.metadata.get('dc:title')
-          : null
-        const title = titleFromInfo || titleFromXmp || book.filename
-
-        book.name = title
-        book.totalPages = numPages || pdf.numPages
         book.page = pageNumber
         book.progress = (pageNumber / (book.totalPages || 1)) * 100
 
       } catch (err) {
-        console.error('Error reading PDF metadata:', err)
-        // Fallback: save what we have
-        book.totalPages = numPages
         book.page = pageNumber
         book.progress = Math.floor((pageNumber / (numPages || 1)) * 100)
       }
@@ -317,7 +329,7 @@ function LibraryPage() {
               {modalState.heading}
             </Dialog.Title>
             <Dialog.Description>
-              <p>{modalState.message}</p>
+              {modalState.message}
             </Dialog.Description>
             <div className="mt-4 flex justify-end">
               <button
