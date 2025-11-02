@@ -21,5 +21,5 @@
   @apply p-[1.75rem] bg-white rounded-md md:w-[300px] min-w-[200px]
 }
 .bg-theme{
-  @apply bg-gray-200
+  @apply bg-gray-200 min-h-[95vh]
 }

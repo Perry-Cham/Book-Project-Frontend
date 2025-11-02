@@ -1,13 +1,19 @@
-import axios from "axios"
 import { useState } from "react"
 import { Dialog } from '@headlessui/react'
+import api from '../utilities/api'
+import { deleteDB } from "idb"
 function Profile_Page() {
-    const api = import.meta.env.VITE_API
     const [modalState, setModalState] = useState({ open: false, message: "", title: "" })
     async function handleDeleteAccount() {
         try {
-            const response = await axios.delete(`${api}/deleteuser`, { withCredentials: true })
-            if (response.status === 200) setModalState(prev => ({ ...prev, message: "Your account has been deleted", title: "Success" })); else setModalState(prev => ({ ...prev, message: "We encountered an error, try again later", title: "Error" }))
+            const response = await api.delete(`/deleteuser`)
+            if (response.status === 200){
+                setModalState(prev => ({ ...prev, message: "Your account has been deleted", title: "Success" }));
+                await deleteDB('App',1)
+                localStorage.clear()
+                const root = await navigator.storage.getDirectory()
+                await root.remove({recursive: true})
+         }else setModalState(prev => ({ ...prev, message: "We encountered an error, try again later", title: "Error" }))
         } catch (error) {
             console.error(error)
             setModalState(prev => ({ ...prev, message: "We encountered an error, try again later", title: "Error" }))
@@ -21,7 +27,7 @@ function Profile_Page() {
             </header>
             <main>
                 <ul>
-                    <li onClick={() => handleDeleteAccount()}>Delete Account</li>
+                    <li className="cursor-pointer" onClick={() => handleDeleteAccount()}>Delete Account</li>
                     <li>Toggle Syncing</li>
                     <li>View Books On Account</li>
                 </ul>

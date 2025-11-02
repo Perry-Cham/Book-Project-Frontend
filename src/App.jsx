@@ -23,8 +23,7 @@ const ProtectedRoute = () => {
         const response = await api.get(`/getsession`)
          console.log("action", response.status === 200)
         if (response.status === 200) {
-          console.log("this is the code inside the block")
-          isAuth(true);
+          console.log(response.data)
           setUser(response.data.name)
         }
       } catch (error) {

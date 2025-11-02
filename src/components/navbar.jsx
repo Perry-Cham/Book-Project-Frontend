@@ -22,7 +22,7 @@ function Navigation_Bar() {
   }
   
   return (
- navIsOpen && <header className="relative shadow-md flex justify-between items-center py-4 pl-4 ">
+ navIsOpen && <header className="relative shadow-md flex justify-between items-center py-4 pl-4">
       <h2 className="text-lg"><Link to='/'>P'S BOOKS</Link></h2>
       <nav className="hidden md:block">
         <ul className="flex md:justify-center md:items-center">

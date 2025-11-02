@@ -193,6 +193,7 @@ function LibraryPage() {
         const metadata = await pdf.getMetadata()
 
         // Prefer the info Title, then XMP metadata dc:title, then filename
+        console.log(metadata)
         const titleFromInfo = metadata?.info?.Title
         const titleFromXmp = metadata?.metadata && typeof metadata.metadata.get === 'function'
           ? metadata.metadata.get('dc:title')

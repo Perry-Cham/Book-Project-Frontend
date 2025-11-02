@@ -88,7 +88,7 @@ function Study_Modal({ type, handleSubmit }) {
   return (
     <div>
       {type === 'timetable' ? 
-        <form onSubmit={(e) => sendData(e,timetableForm)}>
+        <form onSubmit={(e) => sendData(e,timetableForm)} >
           {days.map((day) => {
             const entry = timetableForm.find(d => d.day === day)
             const dayData = entry || { 

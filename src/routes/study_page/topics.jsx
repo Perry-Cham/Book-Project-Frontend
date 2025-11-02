@@ -137,7 +137,7 @@ function Topics() {
           </>
         )}
         {(!goalData && !showForm) && (
-          <div>
+          <div className="px-2"> 
             <h2>Study Targets</h2>
             <p>You haven't set any study targets yet. When you make a new target you'll see it here.</p>
             <button className="btn-secondary" onClick={() => setShowForm(true)}>

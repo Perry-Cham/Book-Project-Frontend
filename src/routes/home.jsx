@@ -53,7 +53,7 @@ function Home() {
     return filtered;
   }
   return (
-    <section className="bg-theme min-h-[85vh]">
+    <section className="bg-theme">
       <h2 className="text-center pt-4 font-bold mb-2 text-lg">Welcome, {user.name && user.name}</h2>
 
       <Swiper
@@ -74,12 +74,12 @@ function Home() {
             />)
         })}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] px-1 gap-1 min-h-[100vh]">
+   {active !== 'All' &&  <div className="grid grid-cols-2 md:grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] px-1 gap-1 min-h-[100vh]">
         {(books && active !== "All") && filterBooks().map(book => (<Book_Card key={book.id}
           book={book}
           type={"homeBook"}
         />))}
-      </div>
+      </div>}
     </section>
   )
 }

@@ -46,8 +46,6 @@ function History_Section({ cbooks }) {
 
   }, []);
 
-  console.log(api)
-
   const processReadingData = () => {
     // Get current week (Sunday to Saturday)
     const today = new Date();
