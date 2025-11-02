@@ -4,14 +4,14 @@ function Book_Card({ book, type, functions }) {
 
   return (
     <div className={`text-capitalize my-4 px-4${type === "homeBook" && "sm:min-h-[100px] bg-white rounded-md py-2 px-1"}`}>
-      <img className="w-[150px]" src={book.cover} alt={book.title + " cover image"} />
+      <img className="w-[150px]" src={book.cover || null} alt={book.title + " cover image"} />
       <p>{book.title}</p>
       <p>{book.author}</p>
       <p>{book.genre}</p>
       <p>{book.pageCount}</p>
       {type == "currentBook" &&
         <>
-          <p>Current Page: {book.page}</p>
+          {book.fileType == "pdf" && <p>Current Page: {book.page}</p>}
           <input type="range" value={book.progress || 0.1} max={100} />
           <p>{book.progress || 0.1}%</p>
         </>

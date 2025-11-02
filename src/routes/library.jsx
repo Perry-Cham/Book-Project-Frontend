@@ -136,7 +136,7 @@ function LibraryPage() {
             listAllBooks();
           })
         }
-        
+
         setModalState(prev => ({ open: true, message: `The ${files.length > 1 ? 'books' : 'book'} has been added successfully`, title: "success" }))
         listAllBooks(); // Refresh the book list
       }
@@ -216,21 +216,18 @@ function LibraryPage() {
     const book = await db.get('Books', bookToRead.id)
 
     if (bookToRead.type === 'pdf') {
-      try {
-        book.page = pageNumber
-        book.progress = (pageNumber / (book.totalPages || 1)) * 100
-
-      } catch (err) {
-        book.page = pageNumber
-        book.progress = Math.floor((pageNumber / (numPages || 1)) * 100)
-      }
+      book.page = pageNumber
+      book.progress = parseFloat(((pageNumber / (book.totalPages || 1)) * 100).toFixed(2))
     } else {
-      book.progress = Math.floor(renditionRef.current?.book.locations?.percentageFromCfi(location) * 100);
+      let progress = renditionRef.current?.book.locations?.percentageFromCfi(location) * 100;
+      progress = parseFloat(progress.toFixed(2));
+      book.progress = progress;
       book.epubcfi = location;
       book.name = renditionRef.current?.book?.packaging.metadata?.title
     }
 
     await db.put("Books", book)
+    syncPages()
     setBookToRead(null);
     setUrl("");
     setNavIsOpen(true)
@@ -274,10 +271,17 @@ function LibraryPage() {
   async function syncPages() {
     const db = await openDB('App', 1)
     const book = await db.get('Books', bookToRead.id)
-    const data = { name: book.name, progress: book.progress }
-    bookToRead.type === "epub" ? data.location = location : data.page = bookToRead.lastPage;
+    console.log(book)
+    const data = { name: book.name || book.filename, progress: book.progress, type: book.fileType }
+    console.log(data)
+    if (book.fileType === "epub") {
+      data.location = location
+    } else if (book.fileType === "pdf") {
+      data.page = bookToRead.lastPage
+    }
+    console.log(data)
     try {
-      await axios.patch(`${api}/syncpages`, data, { withCredentials: true })
+      await api.patch(`/syncpages`, data, { withCredentials: true })
     } catch (error) {
       console.error('Error syncing pages:', error)
     }
