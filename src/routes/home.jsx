@@ -65,7 +65,7 @@ function Home() {
           <p className="text-center">{genre}</p>
         </div></SwiperSlide>))}
       </Swiper>
-      <div className="grid grid-cols-2 md:grid-cols-3 px-1 gap-1 md:gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] px-1 gap-1 md:gap-3">
         {(books && active === "All") && books.map((book) => {
           return (
             <Book_Card key={book.id}
@@ -74,7 +74,7 @@ function Home() {
             />)
         })}
       </div>
-   {active !== 'All' &&  <div className="grid grid-cols-2 md:grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] px-1 gap-1 min-h-[100vh]">
+   {active !== 'All' &&  <div className="grid grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] px-1 gap-1 min-h-[100vh]">
         {(books && active !== "All") && filterBooks().map(book => (<Book_Card key={book.id}
           book={book}
           type={"homeBook"}
