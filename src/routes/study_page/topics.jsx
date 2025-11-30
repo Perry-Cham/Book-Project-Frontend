@@ -108,9 +108,9 @@ function Topics() {
                 <h3 className="">Topics</h3>
                 <ul>
                   {subject.topics.map(topic => (
-                    <li onClick={() => handleTopicComplete(topic.name)}className={`border rounded-lg ${topic.completed && 'border-blue-800 border-2'}`} key={Math.random() + Date.now()}>
+                    <li onClick={() => handleTopicComplete(topic.name)}className={`border rounded-lg my-2 px-2 py-1 ${topic.completed && 'border-blue-800 border-2 text-muted'}`} key={Math.random() + Date.now()}>
                       <p>{topic.name}</p>
-                    {!topic.completed && <button classname="btn-primary" onClick={async () => {
+                    {!topic.completed && <button className="" onClick={async () => {
                         const copy = [...goalData]
                         const parent = copy.find(el => el.subject === subject.subject)
                         const index = parent.topics.indexOf(topic)
