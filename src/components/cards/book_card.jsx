@@ -11,7 +11,7 @@ function Book_Card({ book, type, functions }) {
     >
       <div className="h-250px">
         <img
-          className="h-[250px] w-[200px] object-cover"
+          className="h-[250px] w-[180px] object-cover rounded-md"
           src={book.cover || null}
           alt={book.title + " cover image"}
         />

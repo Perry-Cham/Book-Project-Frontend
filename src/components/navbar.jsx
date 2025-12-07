@@ -7,6 +7,7 @@ function Navigation_Bar() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate();
   const location = useLocation();
+  const user = useAuthStore((state) => state.user)
   const setUser = useAuthStore((state) => state.setUser)
   const navIsOpen = useNavStore(state => state.isOpen)
   const api = import.meta.env.VITE_API
@@ -18,6 +19,7 @@ function Navigation_Bar() {
   }
   async function handleLogout() {
    localStorage.removeItem('token')
+   setUser({name: "", isLoggedIn: ""})
    navigate('/')
   }
   
@@ -31,6 +33,7 @@ function Navigation_Bar() {
           <li className="px-4"><Link to="/study">Study</Link></li>
           <li className="px-4"><Link to="/library">Library</Link></li>
           <li className="px-4"><Link to="/profile">Profile</Link></li>
+          <li className="px-4">{user.name && <span>{user.name}</span>}</li>
           <li className="px-4 cursor-pointer" onClick={handleLogout}>Logout</li>
         </ul>
       </nav> 
@@ -42,6 +45,7 @@ function Navigation_Bar() {
           <li className={`px-4 py-3  ${location.pathname == '/study' ? 'active-link' : ""}`}><Link to="/study">Study</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/library' ? 'active-link' : ""}`}><Link to="/library">Library</Link></li>
           <li className={`px-4 py-3  ${location.pathname == '/profile' ? 'active-link' : ""}`}><Link to="/profile">Profile</Link></li>
+          <li className="px-4 py-3">{user.name && <span>{user.name}</span>}</li>
           <li className="px-4 py-3" onClick={handleLogout}>Logout</li>
         </ul>
       </nav>

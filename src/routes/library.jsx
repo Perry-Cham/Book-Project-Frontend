@@ -324,8 +324,8 @@ function LibraryPage() {
       )}
     </section>
   ) : (
-    <section className="px-2">
-      <p>Hello {user.name},</p>
+    <section className="px-4 py-2">
+      <p className="text-lg md:text-xl font-medium">Hello {user.name},</p>
       <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">

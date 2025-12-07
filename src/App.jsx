@@ -14,8 +14,9 @@ import Home from './routes/home'
 import './css/styles.css'
 import api from './utilities/api'
 import useAuthStore from './stores/auth_store'
+import { set } from 'date-fns'
 const ProtectedRoute = () => {
-  const [auth, isAuth] = useState(false);
+  const [auth, setAuth] = useState(false);
   const {setUser} = useAuthStore()
   useEffect(() => {
     const checkAuth = async () => {
@@ -24,17 +25,18 @@ const ProtectedRoute = () => {
          console.log("action", response.status === 200)
         if (response.status === 200) {
           console.log(response.data)
-          setUser(response.data.name)
+          setAuth(true);
+          setUser(response.data)
         }
       } catch (error) {
         console.error(error);
       }
     };
     checkAuth();
-  }, []);
+  }, [setUser]);
 
   return (
-    true ? <>
+    auth ? <>
       <Navigation_Bar />
       <Outlet />  {/* This will render the current route's element */}
     </> : <>
@@ -51,6 +53,7 @@ const Layout = () => {
     </>
   )
 }
+
 
 function App() {
   const api = import.meta.env.VITE_API
