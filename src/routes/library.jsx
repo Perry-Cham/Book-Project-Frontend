@@ -137,9 +137,10 @@ function LibraryPage() {
           })
         }
 
-        setModalState(prev => ({ open: true, message: `The ${files.length > 1 ? 'books' : 'book'} has been added successfully`, title: "success" }))
+        setModalState(prev => ({ open: true, message: `The ${files.length > 1 ? 'books' : 'book'} has been addedvalue =" successfully`, title: "success" }))
         listAllBooks(); // Refresh the book list
       }
+      e.target.value = ""
     } catch (err) {
       console.error('Error storing book:', err);
       alert('Operation failed');

@@ -96,7 +96,7 @@ function Book_Section({ props, bookProps }) {
     const isSaved = saved;
     if (isSaved) {
       try {
-        const response = await axios.delete(`${api}/deletesaved/${id}`, {
+        const response = await api.delete(`/deletesaved/${id}`, {
           withCredentials: true
         });
         if (response.status == 200) {
@@ -111,18 +111,18 @@ function Book_Section({ props, bookProps }) {
       }
     } else {
       try {
-        const response = await axios.delete(`${api}/deletecurrent/${id}`, {
+        const response = await api.delete(`/deletecurrent/${id}`, {
           withCredentials: true
         });
         if (response.status == 200) {
           alert("You have deleted the book successfully");
           getCurrentBooks();
         } else {
-          alert("Server side error current");
+          alert("Server side error");
         }
       } catch (err) {
         console.error(err);
-        alert("Server side error current");
+        alert("Server side error");
       }
     }
   }
@@ -147,20 +147,11 @@ function Book_Section({ props, bookProps }) {
     <>
       <section className="py-4 my-2 mx-1 bg-white rounded-sm">
         <h2 className="text-center font-medium text-lg">Currently Reading</h2>
-        {/*}
-        {modalState.open && <Modal setModalState={setModalState} modalState={modalState} />}
-
-        <button onClick={() => openModal("", "addCustomBook", handleAddCustom)} className="btn-secondary">Add Your Own Book</button>
-        {cbooks ? cbooks.map((book) =>
-          <Book_Card book={book} type={"currentBook"} functions={{ openModal, setPage, handleDelete }} />) :
-          <div>
-            <p>You haven't started reading anything yet, books you read will appear here</p>
-          </div>}
-      */}
+      
         <Swiper
           modules={[Navigation, Pagination]}
           spaceBetween={50}
-          slidesPerView={1}
+          slidesPerView={window.innerWidth < 640 ? 1 : 3}
           navigation
           pagination={{ clickable: true }}
           className="pb-4 px-11"
