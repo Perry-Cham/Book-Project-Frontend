@@ -17,6 +17,7 @@ import useAuthStore from './stores/auth_store'
 import { set } from 'date-fns'
 const ProtectedRoute = () => {
   const [auth, setAuth] = useState(false);
+  const [loading, setLoading] = useState(true)
   const {setUser} = useAuthStore()
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,10 +31,17 @@ const ProtectedRoute = () => {
         }
       } catch (error) {
         console.error(error);
+      }finally{
+        setLoading(false)
       }
     };
     checkAuth();
   }, [setUser]);
+
+
+if(loading){
+  return null
+}
 
   return (
     auth ? <>
