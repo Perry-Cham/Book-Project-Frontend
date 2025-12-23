@@ -36,3 +36,7 @@ input[type="text"], input[type="number"]{
 .bg-theme {
   @apply bg-gray-200 min-h-[95vh];
 }
+/* PROFILE PAGE STYLES */
+.profile-link{
+  @apply cursor-pointer bg-white  py-3 px-2 border-b-2 border-gray-200
+}

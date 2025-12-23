@@ -2,8 +2,10 @@ import { useState } from "react"
 import { Dialog } from '@headlessui/react'
 import api from '../utilities/api'
 import { deleteDB } from "idb"
+import useAuthStore from "../stores/auth_store"
 function Profile_Page() {
     const [modalState, setModalState] = useState({ open: false, message: "", title: "" })
+    const {user} = useAuthStore()
     async function handleDeleteAccount() {
         try {
             const response = await api.delete(`/deleteuser`)
@@ -20,19 +22,26 @@ function Profile_Page() {
         }
     }
     return (
-        <section>
-            <header>My Profile
-                <div>Placeholder Img</div>
-                <h1>Welcome User!</h1>
-            </header>
-            <main>
-                <ul>
-                    <li className="cursor-pointer" onClick={() => handleDeleteAccount()}>Delete Account</li>
-                    <li>Toggle Syncing</li>
-                    <li>View Books On Account</li>
-                </ul>
+        <section className="w-full flex flex-col bg-theme">
+            <div className="m-auto max-w-[1024px] rounded-lg">
+                <div className="grid grid-cols-2 gap-3 mb-3 p-4 bg-white rounded-lg">
+                    <div className="w-[150px] h-[150px] rounded-[50%] border-2 flex items-center justify-center">Placeholder Img</div>
+                    <div className="p-4">
+                    <h1 className="text-lg font-bold">My Profile</h1>
+                    <h2>{user.name}</h2>
+                    </div>
+                </div>
 
-            </main>
+                <div className="mt-3 bg-white rounded-lg">
+                    <ul>
+                        <li className="profile-link" onClick={() => handleDeleteAccount()}>Delete Account</li>
+                        <li className="profile-link">Toggle Syncing</li>
+                        <li className="profile-link">View Books On Account</li>
+                    </ul>
+
+                </div>
+            </div>
+            
             <Dialog open={modalState.open} onClose={() => setModalState(prev => ({ ...prev, open: false }))} className="relative z-50">
                 <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
                 <div className="fixed inset-0 flex items-center justify-center p-4">

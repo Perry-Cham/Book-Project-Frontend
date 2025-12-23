@@ -1,6 +1,6 @@
 // App.jsx
 import { useState, useEffect, useRef } from 'react'
-import axios from 'axios'
+import {ClipLoader} from "react-spinners"
 import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom'
 import Navigation_Bar from './components/navbar'
 import LandingPage from './routes/landing'
@@ -40,7 +40,9 @@ const ProtectedRoute = () => {
 
 
 if(loading){
-  return null
+  return <div className="flex justify-center items-center h-full w-full"> 
+    <ClipLoader />
+    </div>
 }
 
   return (

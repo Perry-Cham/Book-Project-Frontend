@@ -32,8 +32,7 @@ function Navigation_Bar() {
           <li className="px-4"><Link to="/goal">Goals</Link></li>
           <li className="px-4"><Link to="/study">Study</Link></li>
           <li className="px-4"><Link to="/library">Library</Link></li>
-          <li className="px-4"><Link to="/profile">Profile</Link></li>
-          <li className="px-4">{user.name && <span>{user.name}</span>}</li>
+          <li className="px-4"><Link to="/profile">{user.name && user.name}</Link></li>
           <li className="px-4 cursor-pointer" onClick={handleLogout}>Logout</li>
         </ul>
       </nav> 
